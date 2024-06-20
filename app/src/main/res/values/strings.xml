@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">ToDo</string>
+    <string name="my_things">Мои дела</string>
+    <string name="completed">Выполнено -</string>
+    <string name="icon_eye">Иконка глазика</string>
+    <string name="icon_high_importance">Иконка высокой важности</string>
+    <string name="icon_low_importance">Иконка низкой важности</string>
+    <string name="icon_information">Иконка информации</string>
+    <string name="text_new">Новое</string>
+    <string name="icon_add">Иконка добавления</string>
 </resources>
