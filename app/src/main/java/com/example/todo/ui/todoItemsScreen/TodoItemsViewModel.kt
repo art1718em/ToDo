@@ -1,20 +1,27 @@
 package com.example.todo.ui.todoItemsScreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.todo.data.repository.TodoItemsRepository
 import com.example.todo.domain.model.TodoItem
+import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenState
 import com.example.todo.utils.UNKNOWN_MESSAGE
+import com.example.todo.utils.collectIn
 import com.example.todo.utils.countCompletedItems
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class TodoItemsViewModel @Inject constructor(
     private val todoItemsRepository: TodoItemsRepository,
+    private val navController: NavController,
 ) : ViewModel() {
 
     private var todoItems = listOf<TodoItemUiModel>()
@@ -23,35 +30,28 @@ class TodoItemsViewModel @Inject constructor(
     val todoItemsScreenUiState = _todoItemsScreenUiState.asStateFlow()
 
     init{
-        loadTodoItems()
+        collectTodoItems()
     }
 
-    private fun loadTodoItems(){
-        val currentTodoItemsScreenUiState = todoItemsScreenUiState.value
-        val isHidden = when(currentTodoItemsScreenUiState){
-            is TodoItemsScreenState.Success -> currentTodoItemsScreenUiState.isHiddenCompletedItems
-            else -> false
-        }
-        _todoItemsScreenUiState.value = TodoItemsScreenState.Loading
-        viewModelScope.launch {
-            val result = todoItemsRepository.getTodoItems()
-            _todoItemsScreenUiState.value = if (result.isSuccess){
-                todoItems = result.getOrThrow().map { it.toTodoItemsUiModel() }
-                TodoItemsScreenState.Success(
-                    todoItems = if (isHidden) {
-                        todoItems.filter { !it.isCompleted }
-                    } else{
-                        todoItems
-                    },
-                    countOfCompletedItems = todoItems.countCompletedItems(),
-                    isHiddenCompletedItems = isHidden,
-                )
-            }else{
-                TodoItemsScreenState.Error(
-                    result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE
-                )
+    private fun collectTodoItems(){
+        todoItemsRepository.todoItems.collectIn(viewModelScope){ todoItemsList ->
+            val currentTodoItemsScreenUiState = todoItemsScreenUiState.value
+            val isHidden = when(currentTodoItemsScreenUiState){
+                is TodoItemsScreenState.Success -> currentTodoItemsScreenUiState.isHiddenCompletedItems
+                else -> false
             }
+            todoItems = todoItemsList.map { it.toTodoItemsUiModel() }
+            _todoItemsScreenUiState.value = TodoItemsScreenState.Success(
+                todoItems = if (isHidden) {
+                    todoItems.filter { !it.isCompleted }
+                } else{
+                    todoItems
+                },
+                countOfCompletedItems = todoItems.countCompletedItems(),
+                isHiddenCompletedItems = isHidden,
+            )
         }
+
     }
 
     fun updateIsCompeted(id: String, isChecked: Boolean){
@@ -59,7 +59,6 @@ class TodoItemsViewModel @Inject constructor(
             id =  id,
             isCompleted = isChecked,
         )
-        loadTodoItems()
     }
 
     fun changeHiddenCompletedItems(isHiddenCompleted: Boolean){
@@ -72,6 +71,11 @@ class TodoItemsViewModel @Inject constructor(
             countOfCompletedItems = todoItems.countCompletedItems(),
             isHiddenCompletedItems = isHiddenCompleted,
         )
+    }
+
+    fun navigateToTodoItemDetails(idOfTodoItem: String){
+        Log.d("mytag", idOfTodoItem)
+        navController.navigate("${Screen.TodoItemDetailsScreen.route}/${idOfTodoItem}")
     }
 
 }

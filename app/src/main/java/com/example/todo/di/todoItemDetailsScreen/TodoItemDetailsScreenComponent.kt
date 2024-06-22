@@ -1,24 +1,23 @@
-package com.example.todo.di.todoItemsScreen
+package com.example.todo.di.todoItemDetailsScreen
 
 import androidx.navigation.NavController
 import com.example.todo.data.repository.TodoItemsRepository
 import com.example.todo.di.app.AppComponent
-import com.example.todo.domain.model.TodoItem
-import com.example.todo.ui.todoItemsScreen.TodoItemsPresenter
+import com.example.todo.ui.todoItemDetailsScreen.TodoItemDetailsPresenter
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
 @Component
-interface TodoItemsScreenComponent {
-    fun todoItemsPresenter(): TodoItemsPresenter
+interface TodoItemDetailsScreenComponent {
+    fun todoItemDetailsPresenter(): TodoItemDetailsPresenter
 
     @Component.Factory
     interface Factory {
         fun create(
             @BindsInstance navController: NavController,
-            @BindsInstance todoItemsRepository: TodoItemsRepository
-        ): TodoItemsScreenComponent
+            @BindsInstance todoItemsRepository: TodoItemsRepository,
+        ): TodoItemDetailsScreenComponent
     }
 }

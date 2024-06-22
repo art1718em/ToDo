@@ -7,5 +7,5 @@ data class TodoItem(
     val importance: Importance = Importance.Usual,
     val isCompleted: Boolean = false,
     val dateOfCreation: String = "",
-    val dateOfChange: String = "",
+    val dateOfChange: String? = null,
 )

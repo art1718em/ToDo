@@ -25,6 +25,9 @@ private val DarkColorScheme = darkColorScheme(
     surface = md_theme_dark_surface,
     background = md_theme_dark_background,
 )
+val ColorScheme.elevated: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) md_theme_dark_elevated else md_theme_light_elevated
 
 val ColorScheme.blue: Color
     @Composable
@@ -61,6 +64,14 @@ val ColorScheme.disable: Color
 val ColorScheme.pink: Color
     @Composable
     get() = if (isSystemInDarkTheme()) md_theme_dark_pink else md_theme_light_pink
+
+val ColorScheme.switchTrackChecked: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) md_theme_light_switch_track_checked else md_theme_dark_switch_track_checked
+
+val ColorScheme.switchTrackUnchecked: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) md_theme_light_switch_track_unchecked else md_theme_dark_switch_track_unchecked
 
 private val LightColorScheme = lightColorScheme(
     outline = md_theme_light_outline,

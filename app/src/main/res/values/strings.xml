@@ -8,4 +8,14 @@
     <string name="icon_information">Иконка информации</string>
     <string name="text_new">Новое</string>
     <string name="icon_add">Иконка добавления</string>
+    <string name="icon_close">Иконка отмены</string>
+    <string name="save">СОХРАНИТЬ</string>
+    <string name="what_needs_to_be_done">Что надо сделать...</string>
+    <string name="importance">Важность</string>
+    <string name="no">Нет</string>
+    <string name="low">Низкий</string>
+    <string name="high">!! Высокий</string>
+    <string name="make_it_to">Сделать до</string>
+    <string name="icon_delete">Иконка удаления</string>
+    <string name="delete">Удалить</string>
 </resources>
