@@ -1,6 +1,5 @@
 package com.example.todo.ui.todoItemsScreen
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -9,12 +8,10 @@ import com.example.todo.domain.model.TodoItem
 import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenState
-import com.example.todo.utils.UNKNOWN_MESSAGE
 import com.example.todo.utils.collectIn
 import com.example.todo.utils.countCompletedItems
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -74,7 +71,6 @@ class TodoItemsViewModel @Inject constructor(
     }
 
     fun navigateToTodoItemDetails(idOfTodoItem: String){
-        Log.d("mytag", idOfTodoItem)
         navController.navigate("${Screen.TodoItemDetailsScreen.route}/${idOfTodoItem}")
     }
 

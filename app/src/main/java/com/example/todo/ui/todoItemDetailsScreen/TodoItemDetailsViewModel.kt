@@ -20,7 +20,7 @@ class TodoItemDetailsViewModel @Inject constructor(
     private val navController: NavController,
 ) : ViewModel() {
 
-    private val _todoItemDetailsUiModel = MutableStateFlow<TodoItemDetailsUiModel>(TodoItemDetailsUiModel())
+    private val _todoItemDetailsUiModel = MutableStateFlow(TodoItemDetailsUiModel())
     val todoItemDetailsUiModel = _todoItemDetailsUiModel.asStateFlow()
 
     private val todoItem = MutableStateFlow(TodoItem())
@@ -35,7 +35,7 @@ class TodoItemDetailsViewModel @Inject constructor(
             loadTodoItem(id)
     }
 
-    fun loadTodoItem(id: String){
+    private fun loadTodoItem(id: String){
         todoItem.value = repository.getItem(id)
         _todoItemDetailsUiModel.value = todoItem.value.toTodoItemDetailsUiModel()
     }

@@ -2,8 +2,6 @@ package com.example.todo.di.todoItemsScreen
 
 import androidx.navigation.NavController
 import com.example.todo.data.repository.TodoItemsRepository
-import com.example.todo.di.app.AppComponent
-import com.example.todo.domain.model.TodoItem
 import com.example.todo.ui.todoItemsScreen.TodoItemsPresenter
 import dagger.BindsInstance
 import dagger.Component

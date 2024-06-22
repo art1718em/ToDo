@@ -1,8 +1,6 @@
 package com.example.todo.ui.todoItemDetailsScreen.composables
 
 import android.app.DatePickerDialog
-import android.os.DropBoxManager
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,19 +11,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 
@@ -37,7 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,8 +38,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -73,9 +62,9 @@ import com.example.todo.ui.design.theme.blue
 import com.example.todo.ui.design.theme.disable
 import com.example.todo.ui.design.theme.elevated
 import com.example.todo.ui.design.theme.red
+import com.example.todo.ui.design.theme.switchThumbUnchecked
 import com.example.todo.ui.design.theme.switchTrackChecked
 import com.example.todo.ui.design.theme.switchTrackUnchecked
-import com.example.todo.ui.design.theme.white
 import com.example.todo.ui.todoItemDetailsScreen.TodoItemDetailsPresenter
 import java.util.Calendar
 import java.util.Date
@@ -91,8 +80,6 @@ fun TodoItemDetailsScreen(
     val dateDialogState = remember { mutableStateOf(false) }
 
     val switchState = remember { mutableStateOf(todoItemDetailsUiModel.deadline != null) }
-    Log.d("mytag", todoItemDetailsUiModel.deadline.toString())
-    Log.d("mytag", switchState.value.toString())
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -165,7 +152,7 @@ fun TodoItemDetailsScreen(
                     defaultElevation = 8.dp
                 ),
                 colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.white
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
                 TextField(
@@ -192,9 +179,9 @@ fun TodoItemDetailsScreen(
                         )
                     },
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = MaterialTheme.colorScheme.white,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.white,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.white,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.surface,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.surface,
                     )
                 )
             }
@@ -269,7 +256,10 @@ fun TodoItemDetailsScreen(
                                 modifier = Modifier.padding(2.dp)
                             )
                             DropdownMenuItem(
-                                text = { Text(text = stringResource(id = R.string.high)) },
+                                text = { Text(
+                                    text = stringResource(id = R.string.high),
+                                    color = MaterialTheme.colorScheme.red,
+                                ) },
                                 onClick = {
                                     expanded = false
                                     presenter.updateImportance(Importance.High)
@@ -311,8 +301,9 @@ fun TodoItemDetailsScreen(
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = MaterialTheme.colorScheme.blue,
                                 checkedTrackColor = MaterialTheme.colorScheme.switchTrackChecked,
-                                uncheckedThumbColor = MaterialTheme.colorScheme.white,
+                                uncheckedThumbColor = MaterialTheme.colorScheme.switchThumbUnchecked,
                                 uncheckedTrackColor = MaterialTheme.colorScheme.switchTrackUnchecked,
+
                             ),
                             checked = (todoItemDetailsUiModel.deadline != null || switchState.value),
                             onCheckedChange = {

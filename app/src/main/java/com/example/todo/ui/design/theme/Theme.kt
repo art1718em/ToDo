@@ -67,11 +67,15 @@ val ColorScheme.pink: Color
 
 val ColorScheme.switchTrackChecked: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_light_switch_track_checked else md_theme_dark_switch_track_checked
+    get() = if (isSystemInDarkTheme()) md_theme_dark_switch_track_checked else md_theme_light_switch_track_checked
 
 val ColorScheme.switchTrackUnchecked: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_light_switch_track_unchecked else md_theme_dark_switch_track_unchecked
+    get() = if (isSystemInDarkTheme()) md_theme_dark_switch_track_unchecked else md_theme_light_switch_track_unchecked
+
+val ColorScheme.switchThumbUnchecked: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) md_theme_dark_switch_thumb_unchecked else md_theme_light_switch_thumb_unchecked
 
 private val LightColorScheme = lightColorScheme(
     outline = md_theme_light_outline,
