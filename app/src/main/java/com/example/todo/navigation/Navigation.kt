@@ -44,7 +44,7 @@ fun Navigation(){
         }
         composable(
             route = "${Screen.TodoItemDetailsScreen.route}/{id}",
-            arguments = listOf(navArgument("id") { type = NavType.StringType })
+            arguments = listOf(navArgument("id") { type = NavType.StringType; nullable = true })
         ){
             val todoItemDetailsScreenComponent = remember {
                 DaggerTodoItemDetailsScreenComponent.factory().create(navController, appComponent.todoItemsRepository())

@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,13 +50,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.todo.R
 import com.example.todo.domain.model.Importance
+import com.example.todo.ui.design.BodyText
+import com.example.todo.ui.design.ButtonText
+import com.example.todo.ui.design.SubheadText
 import com.example.todo.ui.design.theme.blue
 import com.example.todo.ui.design.theme.disable
 import com.example.todo.ui.design.theme.elevated
@@ -66,6 +66,7 @@ import com.example.todo.ui.design.theme.switchThumbUnchecked
 import com.example.todo.ui.design.theme.switchTrackChecked
 import com.example.todo.ui.design.theme.switchTrackUnchecked
 import com.example.todo.ui.todoItemDetailsScreen.TodoItemDetailsPresenter
+import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsUiModel
 import java.util.Calendar
 import java.util.Date
 
@@ -79,7 +80,7 @@ fun TodoItemDetailsScreen(
 
     val dateDialogState = remember { mutableStateOf(false) }
 
-    val switchState = remember { mutableStateOf(todoItemDetailsUiModel.deadline != null) }
+    var switchState by remember { mutableStateOf(todoItemDetailsUiModel.deadline != null) }
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -116,11 +117,8 @@ fun TodoItemDetailsScreen(
                             ),
                             onClick = { presenter.addItem() }
                         ) {
-                            Text(
+                            ButtonText(
                                 text = stringResource(id = R.string.save),
-                                fontFamily = FontFamily(Font(R.font.roboto_medium)),
-                                fontSize = 14.sp,
-                                lineHeight = 24.sp,
                             )
                         }
 
@@ -160,7 +158,6 @@ fun TodoItemDetailsScreen(
                         .fillMaxWidth(),
                     value = todoItemDetailsUiModel.text,
                     textStyle = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.roboto_regular)),
                         fontSize = 16.sp,
                         lineHeight = 18.sp,
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -170,11 +167,8 @@ fun TodoItemDetailsScreen(
                     },
                     minLines = 3,
                     placeholder = {
-                        Text(
+                        BodyText(
                             text = stringResource(id = R.string.what_needs_to_be_done),
-                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                            fontSize = 16.sp,
-                            lineHeight = 18.sp,
                             color = MaterialTheme.colorScheme.onTertiary,
                         )
                     },
@@ -185,189 +179,86 @@ fun TodoItemDetailsScreen(
                     )
                 )
             }
-            Spacer(
+
+            Column(
                 modifier = Modifier
-                    .height(12.dp),
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
             ) {
-                Column(
+
+                ImportanceRow(
+                    expanded = expanded,
+                    todoItemDetailsUiModel = todoItemDetailsUiModel,
+                    onOpenDateDialog = { expanded = true },
+                    onCloseDateDialog = { expanded = false },
+                    onUpdateImportance = presenter::updateImportance,
+                )
+
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.outline,
+                    thickness = 0.5.dp,
+                )
+
+                DeadlineRow(
+                    todoItemDetailsUiModel = todoItemDetailsUiModel,
+                    switchState = switchState,
+                    onUpdateDeadline = presenter::updateDeadline,
+                    onSwitchToFalse = {
+                        switchState = false
+                    },
+                    onSwitchToTrue = {
+                        switchState = true
+                        dateDialogState.value = true
+                    },
+                    onOpenDateDialog = {
+                        dateDialogState.value = true
+                    }
+                )
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.outline,
+                    thickness = 0.5.dp,
+                )
+                Spacer(
+                    modifier = Modifier
+                        .height(8.dp),
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 14.dp)
+                        .takeIf { todoItemDetailsUiModel.id.isNotEmpty() }
+                        ?.clickable {
+                            presenter.deleteTodoItem()
+                        } ?: Modifier,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 16.dp),
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .clickable { expanded = true }
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.importance),
-                                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                                    fontSize = 16.sp,
-                                    lineHeight = 18.sp,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                )
-                                Text(
-                                    text = stringResource(
-                                        id = when (todoItemDetailsUiModel.importance) {
-                                            is Importance.Usual -> R.string.no
-                                            is Importance.Low -> R.string.low
-                                            is Importance.High -> R.string.high
-                                        }
-                                    ),
-                                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                                    fontSize = 14.sp,
-                                    lineHeight = 16.sp,
-                                    color = when (todoItemDetailsUiModel.importance) {
-                                        is Importance.High -> MaterialTheme.colorScheme.red
-                                        else -> MaterialTheme.colorScheme.onTertiary
-                                    },
-                                )
-                            }
-                        }
-                        DropdownMenu(
-                            modifier = Modifier
-                                .background(MaterialTheme.colorScheme.elevated),
-                            offset = DpOffset(x = 0.dp, y = 4.dp),
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(text = stringResource(id = R.string.no)) },
-                                onClick = {
-                                    expanded = false
-                                    presenter.updateImportance(Importance.Usual)
-                                },
-                                modifier = Modifier.padding(2.dp),
-                            )
-                            DropdownMenuItem(
-                                text = { Text(text = stringResource(id = R.string.low)) },
-                                onClick = {
-                                    expanded = false
-                                    presenter.updateImportance(Importance.Low)
-                                },
-                                modifier = Modifier.padding(2.dp)
-                            )
-                            DropdownMenuItem(
-                                text = { Text(
-                                    text = stringResource(id = R.string.high),
-                                    color = MaterialTheme.colorScheme.red,
-                                ) },
-                                onClick = {
-                                    expanded = false
-                                    presenter.updateImportance(Importance.High)
-                                },
-                                modifier = Modifier.padding(2.dp)
-                            )
-                        }
-                    }
-                    HorizontalDivider(
+                    Icon(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.outline,
-                        thickness = 0.5.dp,
+                            .padding(end = 12.dp),
+                        tint = if (todoItemDetailsUiModel.id.isNotEmpty()) {
+                            MaterialTheme.colorScheme.red
+                        } else {
+                            MaterialTheme.colorScheme.disable
+                        },
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(id = R.string.icon_delete),
                     )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column {
-                            Text(
-                                text = stringResource(id = R.string.make_it_to),
-                                fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                                fontSize = 16.sp,
-                                lineHeight = 18.sp,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                            )
-                            Text(
-                                text = todoItemDetailsUiModel.deadline ?: "",
-                                fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                                fontSize = 14.sp,
-                                lineHeight = 16.sp,
-                                color = MaterialTheme.colorScheme.blue,
-                            )
-                        }
-                        Switch(
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = MaterialTheme.colorScheme.blue,
-                                checkedTrackColor = MaterialTheme.colorScheme.switchTrackChecked,
-                                uncheckedThumbColor = MaterialTheme.colorScheme.switchThumbUnchecked,
-                                uncheckedTrackColor = MaterialTheme.colorScheme.switchTrackUnchecked,
-
-                            ),
-                            checked = (todoItemDetailsUiModel.deadline != null || switchState.value),
-                            onCheckedChange = {
-                                if (switchState.value) {
-                                    switchState.value = false
-                                    presenter.updateDeadline(null)
-                                } else {
-                                    switchState.value = true
-                                    dateDialogState.value = true
-                                }
-                            }
-                        )
-
-                    }
-                    Spacer(
-                        modifier = Modifier
-                            .height(24.dp),
+                    BodyText(
+                        text = stringResource(id = R.string.delete),
+                        color = if (todoItemDetailsUiModel.id.isNotEmpty()) {
+                            MaterialTheme.colorScheme.red
+                        } else {
+                            MaterialTheme.colorScheme.disable
+                        },
                     )
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.outline,
-                        thickness = 0.5.dp,
-                    )
-                    Spacer(
-                        modifier = Modifier
-                            .height(8.dp),
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 14.dp)
-                            .clickable {
-                                if (todoItemDetailsUiModel.id.isNotEmpty()) {
-                                    presenter.deleteTodoItem()
-                                }
-                            },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            tint =  if (todoItemDetailsUiModel.id.isNotEmpty()){
-                                MaterialTheme.colorScheme.red
-                            }else{
-                                MaterialTheme.colorScheme.disable
-                            },
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(id = R.string.icon_delete),
-                        )
-                        Text(
-                            modifier = Modifier
-                                .padding(start = 12.dp),
-                            text = stringResource(id = R.string.delete),
-                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                            fontSize = 16.sp,
-                            lineHeight = 20.sp,
-                            color = if (todoItemDetailsUiModel.id.isNotEmpty()){
-                                MaterialTheme.colorScheme.red
-                            } else{
-                                MaterialTheme.colorScheme.disable
-                            },
-                        )
-                    }
                 }
             }
+
         }
     }
 
@@ -377,13 +268,13 @@ fun TodoItemDetailsScreen(
     if (dateDialogState.value) {
         DatePickerDialog(
             onDateSelected = { date ->
-                presenter.updateDeadline(date)
+                presenter.updateDeadline(date.time)
                 dateDialogState.value = false
             },
             onDismissRequest = {
                 dateDialogState.value = false
                 if (todoItemDetailsUiModel.deadline == null)
-                    switchState.value = false
+                    switchState = false
             }
         )
     }
@@ -412,5 +303,140 @@ fun DatePickerDialog(onDateSelected: (Date) -> Unit, onDismissRequest: () -> Uni
     }
 
     datePickerDialog.show()
+}
+
+@Composable
+fun ImportanceRow(
+    expanded: Boolean,
+    todoItemDetailsUiModel: TodoItemDetailsUiModel,
+    onOpenDateDialog: () -> Unit,
+    onCloseDateDialog: () -> Unit,
+    onUpdateImportance: (Importance) -> Unit,
+){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .clickable { onOpenDateDialog() }
+        ) {
+            BodyText(
+                text = stringResource(id = R.string.importance),
+            )
+
+            SubheadText(
+                text = stringResource(
+                    id = when (todoItemDetailsUiModel.importance) {
+                        is Importance.Usual -> R.string.no
+                        is Importance.Low -> R.string.low
+                        is Importance.High -> R.string.high
+                    }
+                ),
+                color = when (todoItemDetailsUiModel.importance) {
+                    is Importance.High -> MaterialTheme.colorScheme.red
+                    else -> MaterialTheme.colorScheme.onTertiary
+                },
+            )
+        }
+    }
+    DropdownMenu(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.elevated),
+        offset = DpOffset(x = 0.dp, y = 4.dp),
+        expanded = expanded,
+        onDismissRequest = { onCloseDateDialog() }
+    ) {
+        DropdownMenuItem(
+            text = { Text(text = stringResource(id = R.string.no)) },
+            onClick = {
+                onCloseDateDialog()
+                onUpdateImportance(Importance.Usual)
+            },
+            modifier = Modifier.padding(2.dp),
+        )
+        DropdownMenuItem(
+            text = { Text(text = stringResource(id = R.string.low)) },
+            onClick = {
+                onCloseDateDialog()
+                onUpdateImportance(Importance.Low)
+            },
+            modifier = Modifier.padding(2.dp)
+        )
+        DropdownMenuItem(
+            text = {
+                Text(
+                    text = stringResource(id = R.string.high),
+                    color = MaterialTheme.colorScheme.red,
+                )
+            },
+            onClick = {
+                onCloseDateDialog()
+                onUpdateImportance(Importance.High)
+            },
+            modifier = Modifier.padding(2.dp)
+        )
+    }
+}
+
+@Composable
+fun DeadlineRow(
+    todoItemDetailsUiModel: TodoItemDetailsUiModel,
+    switchState: Boolean,
+    onUpdateDeadline: (Long?) -> Unit,
+    onSwitchToFalse: () -> Unit,
+    onSwitchToTrue: () -> Unit,
+    onOpenDateDialog: () -> Unit,
+){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                top = 16.dp,
+                bottom = 40.dp,
+            ),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = if (switchState){
+                Modifier
+                    .clickable {
+                        onOpenDateDialog()
+                    }
+            } else {
+                Modifier
+            },
+        ) {
+            BodyText(
+                text = stringResource(id = R.string.make_it_to),
+            )
+
+            SubheadText(
+                text = todoItemDetailsUiModel.deadline ?: "",
+                color = MaterialTheme.colorScheme.blue,
+            )
+        }
+        Switch(
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.blue,
+                checkedTrackColor = MaterialTheme.colorScheme.switchTrackChecked,
+                uncheckedThumbColor = MaterialTheme.colorScheme.switchThumbUnchecked,
+                uncheckedTrackColor = MaterialTheme.colorScheme.switchTrackUnchecked,
+
+                ),
+            checked = (todoItemDetailsUiModel.deadline != null || switchState),
+            onCheckedChange = {
+                if (switchState) {
+                    onSwitchToFalse()
+                    onUpdateDeadline(null)
+                } else {
+                    onSwitchToTrue()
+                }
+            }
+        )
+
+    }
 }
 

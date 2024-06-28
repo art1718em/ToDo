@@ -18,7 +18,11 @@ class TodoItemsPresenter @Inject constructor(
         todoItemsViewModel.changeHiddenCompletedItems(isHiddenCompletedItems)
     }
 
-    fun navigateToItemDetails(id: String){
+    fun deleteItem(id: String){
+        todoItemsViewModel.deleteTodoItem(id)
+    }
+
+    fun navigateToItemDetails(id: String?){
         todoItemsViewModel.navigateToTodoItemDetails(id)
     }
 }

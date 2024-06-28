@@ -25,6 +25,7 @@ private val DarkColorScheme = darkColorScheme(
     surface = md_theme_dark_surface,
     background = md_theme_dark_background,
 )
+
 val ColorScheme.elevated: Color
     @Composable
     get() = if (isSystemInDarkTheme()) md_theme_dark_elevated else md_theme_light_elevated

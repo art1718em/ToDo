@@ -26,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -36,15 +35,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.todo.R
 import com.example.todo.domain.model.Importance
+import com.example.todo.ui.design.BodyText
+import com.example.todo.ui.design.LargeTitleText
 import com.example.todo.ui.design.ProgressBar
+import com.example.todo.ui.design.SubheadText
+import com.example.todo.ui.design.SwipeContainer
 import com.example.todo.ui.design.theme.blue
 import com.example.todo.ui.design.theme.gray
 import com.example.todo.ui.design.theme.green
@@ -70,6 +69,7 @@ fun TodoItemsScreen(
             onCheckedChange = presenter::updateIsCompleted,
             onChangeHiddenCompletedItems = presenter::changeHiddenCompletedItems,
             onNavigateToDetails = presenter::navigateToItemDetails,
+            onDeleteItem = presenter::deleteItem,
         )
 
         is TodoItemsScreenState.Error -> {}
@@ -83,7 +83,8 @@ fun ListTodoItems(
     isHiddenCompletedItems: Boolean,
     onCheckedChange: (String, Boolean) -> Unit,
     onChangeHiddenCompletedItems: (Boolean) -> Unit,
-    onNavigateToDetails: (String) -> Unit,
+    onDeleteItem: (String) -> Unit,
+    onNavigateToDetails: (String?) -> Unit,
 ) {
     Scaffold(
         floatingActionButton = {
@@ -94,7 +95,7 @@ fun ListTodoItems(
                     .padding(bottom = 16.dp, end = 8.dp)
                     .size(56.dp),
                 onClick = {
-                    onNavigateToDetails("new")
+                    onNavigateToDetails(null)
                 },
                 shape = CircleShape,
             ) {
@@ -114,58 +115,13 @@ fun ListTodoItems(
                 modifier = Modifier
                     .height(60.dp),
             )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 60.dp,
-                        end = 24.dp
-                    ),
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.my_things),
-                        fontFamily = FontFamily(Font(R.font.roboto_medium)),
-                        fontSize = 32.sp,
-                        lineHeight = 37.5.sp
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.completed) + " $countOfCompletedItems",
-                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                            color = MaterialTheme.colorScheme.onTertiary,
-                            fontSize = 16.sp,
-                            lineHeight = 20.sp
-                        )
-                        IconButton(
-                            onClick = {
-                                onChangeHiddenCompletedItems(!isHiddenCompletedItems)
-                            },
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .size(24.dp),
-                                painter = painterResource(
-                                    id = if (!isHiddenCompletedItems) {
-                                        R.drawable.ic_eye_visible
-                                    } else {
-                                        R.drawable.ic_eye_invisible
-                                    }
-                                ),
-                                contentDescription = stringResource(id = R.string.icon_eye),
-                                tint = MaterialTheme.colorScheme.blue,
-                            )
-                        }
 
-                    }
-                }
-            }
+            Header(
+                countOfCompletedItems = countOfCompletedItems,
+                isHiddenCompletedItems = isHiddenCompletedItems,
+                onChangeHiddenCompletedItems = onChangeHiddenCompletedItems,
+            )
+
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -182,12 +138,14 @@ fun ListTodoItems(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.surface),
                 ) {
-                    items(todoItems) { todoItem ->
-                        TodoItemRow(
-                            todoItem = todoItem,
-                            onCheckedChange = onCheckedChange,
-                            onNavigateToDetails = onNavigateToDetails,
-                        )
+                    items(items = todoItems, key = {it.id}) { todoItem ->
+                        SwipeContainer(todoItemUiModel = todoItem, onDelete = onDeleteItem, onCheckedChange = onCheckedChange) {
+                            TodoItemRow(
+                                todoItem = todoItem,
+                                onCheckedChange = onCheckedChange,
+                                onNavigateToDetails = onNavigateToDetails,
+                            )
+                        }
                     }
 
                     item {
@@ -198,14 +156,10 @@ fun ListTodoItems(
                                 .padding(start = 52.dp, bottom = 20.dp, top = 12.dp),
                         ) {
                             TextButton(
-                                onClick = { onNavigateToDetails("new") }
+                                onClick = { onNavigateToDetails(null) }
                             ) {
-                                Text(
+                                BodyText(
                                     text = stringResource(id = R.string.text_new),
-                                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                                    fontSize = 16.sp,
-                                    lineHeight = 20.sp,
-                                    maxLines = 1,
                                     color = MaterialTheme.colorScheme.onTertiary,
                                 )
                             }
@@ -217,16 +171,74 @@ fun ListTodoItems(
     }
 }
 
+@Composable
+fun Header(
+    countOfCompletedItems: Int,
+    isHiddenCompletedItems: Boolean,
+    onChangeHiddenCompletedItems: (Boolean) -> Unit,
+) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = 60.dp,
+                end = 24.dp
+            ),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            LargeTitleText(
+                text = stringResource(id = R.string.my_things),
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                BodyText(
+                    text = stringResource(id = R.string.completed) + " $countOfCompletedItems",
+                    color = MaterialTheme.colorScheme.onTertiary,
+                )
+
+                IconButton(
+                    onClick = {
+                        onChangeHiddenCompletedItems(!isHiddenCompletedItems)
+                    },
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(24.dp),
+                        painter = painterResource(
+                            id = if (!isHiddenCompletedItems) {
+                                R.drawable.ic_eye_visible
+                            } else {
+                                R.drawable.ic_eye_invisible
+                            }
+                        ),
+                        contentDescription = stringResource(id = R.string.icon_eye),
+                        tint = MaterialTheme.colorScheme.blue,
+                    )
+                }
+
+            }
+        }
+    }
+
+}
 
 @Composable
 fun TodoItemRow(
     todoItem: TodoItemUiModel,
     onCheckedChange: (String, Boolean) -> Unit,
-    onNavigateToDetails: (String) -> Unit,
+    onNavigateToDetails: (String?) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Checkbox(
             modifier = Modifier
@@ -287,28 +299,20 @@ fun TodoItemRow(
                     .fillMaxHeight()
                     .padding(start = 4.dp),
             ) {
-                Text(
-                    style = TextStyle(
+                BodyText(
+                    text = todoItem.text,
+                    maxLines = 3,
+                    textStyle = TextStyle(
                         textDecoration = if (todoItem.isCompleted) {
                             TextDecoration.LineThrough
                         } else {
                             TextDecoration.None
                         }
                     ),
-                    text = todoItem.text,
-                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                    fontSize = 16.sp,
-                    lineHeight = 20.sp,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
                 )
-                Text(
+
+                SubheadText(
                     text = todoItem.deadline ?: "",
-                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    maxLines = 1,
-                    color = MaterialTheme.colorScheme.onTertiary,
                 )
             }
 

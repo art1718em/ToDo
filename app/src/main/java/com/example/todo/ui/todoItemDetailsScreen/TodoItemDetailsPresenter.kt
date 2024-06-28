@@ -1,7 +1,6 @@
 package com.example.todo.ui.todoItemDetailsScreen
 
 import com.example.todo.domain.model.Importance
-import java.util.Date
 import javax.inject.Inject
 
 class TodoItemDetailsPresenter @Inject constructor(
@@ -18,7 +17,7 @@ class TodoItemDetailsPresenter @Inject constructor(
         todoItemDetailsViewModel.updateImportance(importance)
     }
 
-    fun updateDeadline(deadline: Date?){
+    fun updateDeadline(deadline: Long?){
         todoItemDetailsViewModel.updateDeadline(deadline)
     }
 

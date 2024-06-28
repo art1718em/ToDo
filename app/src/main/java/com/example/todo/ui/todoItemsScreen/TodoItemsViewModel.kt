@@ -8,6 +8,7 @@ import com.example.todo.domain.model.TodoItem
 import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenState
+import com.example.todo.utils.DateFormatting
 import com.example.todo.utils.collectIn
 import com.example.todo.utils.countCompletedItems
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,7 +71,11 @@ class TodoItemsViewModel @Inject constructor(
         )
     }
 
-    fun navigateToTodoItemDetails(idOfTodoItem: String){
+    fun deleteTodoItem(id: String){
+        todoItemsRepository.deleteItem(id)
+    }
+
+    fun navigateToTodoItemDetails(idOfTodoItem: String?){
         navController.navigate("${Screen.TodoItemDetailsScreen.route}/${idOfTodoItem}")
     }
 
@@ -82,6 +87,6 @@ fun TodoItem.toTodoItemsUiModel(): TodoItemUiModel{
             text = text,
             isCompleted = isCompleted,
             importance = importance,
-            deadline = deadline,
+            deadline = DateFormatting.toFormattedDate(deadline),
         )
 }

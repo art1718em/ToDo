@@ -1,5 +1,6 @@
 package com.example.todo.ui.todoItemDetailsScreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.todo.data.repository.TodoItemsRepository
@@ -7,12 +8,11 @@ import com.example.todo.domain.model.Importance
 import com.example.todo.domain.model.TodoItem
 import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsUiModel
+import com.example.todo.utils.DateFormatting
 import com.example.todo.utils.generateId
-import com.example.todo.utils.toFormattedDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Calendar
-import java.util.Date
 import javax.inject.Inject
 
 class TodoItemDetailsViewModel @Inject constructor(
@@ -25,13 +25,13 @@ class TodoItemDetailsViewModel @Inject constructor(
 
     private val todoItem = MutableStateFlow(TodoItem())
 
-    private val id: String = navController
+    private val id: String? = navController
         .getBackStackEntry("${Screen.TodoItemDetailsScreen.route}/{id}")
         .arguments
-        ?.getString("id") ?: ""
+        ?.getString("id")
 
     init {
-        if (id != "new")
+        if (id != null)
             loadTodoItem(id)
     }
 
@@ -52,35 +52,36 @@ class TodoItemDetailsViewModel @Inject constructor(
         )
     }
 
-    fun updateDeadline(deadline: Date?){
+    fun updateDeadline(deadline: Long?){
         _todoItemDetailsUiModel.value = todoItemDetailsUiModel.value.copy(
-            deadline = deadline?.toFormattedDate(),
+            deadline = DateFormatting.toFormattedDate(deadline),
         )
     }
 
     fun saveItem(){
-        val calendar = Calendar.getInstance()
-        val currentDate = calendar.time
+        val currentDateMillis = Calendar.getInstance().timeInMillis
         repository.saveItem(
             TodoItem(
                 id = todoItem.value.id.ifEmpty {
                     generateId()
                 },
                 text = todoItemDetailsUiModel.value.text,
-                deadline = todoItemDetailsUiModel.value.deadline,
+                deadline = DateFormatting.toDateLong(todoItemDetailsUiModel.value.deadline),
                 importance = todoItemDetailsUiModel.value.importance,
                 isCompleted = if (todoItem.value.id.isEmpty()){
                     false
                 }else{
                     todoItem.value.isCompleted
                 },
-                dateOfCreation = todoItem.value.dateOfCreation.ifEmpty {
-                    currentDate.toFormattedDate()
+                dateOfCreation = if (todoItem.value.dateOfCreation == 0L){
+                    currentDateMillis
+                } else {
+                    todoItem.value.dateOfCreation
                 },
                 dateOfChange = if (todoItem.value.id.isEmpty()){
                     null
                 }else{
-                    currentDate.toFormattedDate()
+                    currentDateMillis
                 },
             )
         )
@@ -102,6 +103,6 @@ fun TodoItem.toTodoItemDetailsUiModel(): TodoItemDetailsUiModel{
         id = id,
         text = text,
         importance = importance,
-        deadline = deadline,
+        deadline = DateFormatting.toFormattedDate(deadline),
     )
 }

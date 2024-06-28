@@ -8,6 +8,5 @@ import javax.inject.Singleton
 @Component
 @Singleton
 interface AppComponent {
-    fun inject(activity: MainActivity)
     fun todoItemsRepository(): TodoItemsRepository
 }
