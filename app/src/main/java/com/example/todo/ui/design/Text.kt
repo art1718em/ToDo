@@ -4,10 +4,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.todo.R
 import com.example.todo.ui.design.theme.blue
 
 @Composable
@@ -17,10 +17,8 @@ fun LargeTitleText(
 ){
     Text(
         text = text,
-        fontWeight = FontWeight(500),
+        style = MaterialTheme.typography.titleLarge,
         color = color,
-        fontSize = 32.sp,
-        lineHeight = 38.sp,
     )
 }
 
@@ -31,10 +29,8 @@ fun ButtonText(
 ){
     Text(
         text = text.uppercase(),
-        fontWeight = FontWeight(500),
+        style = MaterialTheme.typography.bodyLarge,
         color = color,
-        fontSize = 14.sp,
-        lineHeight = 24.sp,
     )
 }
 
@@ -42,17 +38,14 @@ fun ButtonText(
 fun BodyText(
     text: String,
     color: Color = MaterialTheme.colorScheme.onPrimary,
-    textStyle: TextStyle = TextStyle(),
+    isLineThrough: Boolean,
     maxLines: Int = 1,
     textOverflow: TextOverflow = TextOverflow.Ellipsis,
 ){
     Text(
         text = text,
-        fontWeight = FontWeight(400),
-        style = textStyle,
+        style = if (isLineThrough) MaterialTheme.typography.bodySmall else MaterialTheme.typography.bodyMedium,
         color = color,
-        fontSize = 16.sp,
-        lineHeight = 20.sp,
         maxLines =  maxLines,
         overflow = textOverflow,
     )
@@ -65,9 +58,7 @@ fun SubheadText(
 ){
     Text(
         text = text,
-        fontWeight = FontWeight(400),
         color = color,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
+        style = MaterialTheme.typography.headlineMedium,
     )
 }

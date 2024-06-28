@@ -10,6 +10,10 @@ class TodoItemsPresenter @Inject constructor(
 ){
     val todoItemsScreenUiState = todoItemsViewModel.todoItemsScreenUiState
 
+    fun loadTodoItems(){
+        todoItemsViewModel.collectTodoItems()
+    }
+
     fun updateIsCompleted(id: String, isChecked: Boolean){
         todoItemsViewModel.updateIsCompeted(id, isChecked)
     }

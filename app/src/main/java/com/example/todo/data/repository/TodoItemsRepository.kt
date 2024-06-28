@@ -2,9 +2,11 @@ package com.example.todo.data.repository
 
 import com.example.todo.domain.model.Importance
 import com.example.todo.domain.model.TodoItem
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -117,44 +119,45 @@ class TodoItemsRepository @Inject constructor(){
     )
     val todoItems: StateFlow<List<TodoItem>> get()= _todoItems
 
-
-    fun updateChecked(id: String, isCompleted: Boolean){
-        _todoItems.update {
-            it.map { item ->
-                if (item.id == id) item.copy(isCompleted = isCompleted) else item
+    suspend fun updateChecked(id: String, isCompleted: Boolean){
+        withContext(Dispatchers.IO){
+            _todoItems.update {
+                it.map { item ->
+                    if (item.id == id) item.copy(isCompleted = isCompleted) else item
+                }
             }
         }
     }
 
-    fun saveItem(todoItem: TodoItem) {
-        val updatedList = _todoItems.value.map { item ->
-            if (item.id == todoItem.id) {
-                todoItem
+    suspend fun saveItem(todoItem: TodoItem) {
+        withContext(Dispatchers.IO) {
+            val updatedList = _todoItems.value.map { item ->
+                if (item.id == todoItem.id) {
+                    todoItem
+                } else {
+                    item
+                }
+            }
+            if (updatedList.none { it.id == todoItem.id }) {
+                _todoItems.value = updatedList + todoItem
             } else {
-                item
+                _todoItems.value = updatedList
             }
         }
+    }
 
-        if (updatedList.none { it.id == todoItem.id }) {
-            _todoItems.value = updatedList + todoItem
-        } else {
-            _todoItems.value = updatedList
+    suspend fun deleteItem(id: String){
+        withContext(Dispatchers.IO) {
+            _todoItems.update { currentList ->
+                currentList.filterNot { it.id == id }
+            }
         }
     }
 
-    fun deleteItem(id: String){
-        _todoItems.update { currentList ->
-            currentList.filterNot { it.id == id }
+    // костыль в виде возврата пустого TodoItem будет исправлен, когда будет бэк и возврат Result
+    suspend fun getItem(id: String): TodoItem{
+        return withContext(Dispatchers.IO) {
+            todoItems.value.firstOrNull { it.id == id } ?: TodoItem()
         }
-    }
-
-
-    // TODO выкидывать Error, если не нашли id
-    fun getItem(id: String): TodoItem{
-        todoItems.value.forEach {
-            if (it.id == id)
-                return it
-        }
-        return TodoItem()
     }
 }

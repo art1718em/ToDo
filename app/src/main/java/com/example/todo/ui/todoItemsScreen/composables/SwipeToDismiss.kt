@@ -1,4 +1,4 @@
-package com.example.todo.ui.design
+package com.example.todo.ui.todoItemsScreen.composables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -32,12 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.todo.R
+import com.example.todo.ui.design.theme.ToDoTheme
 import com.example.todo.ui.design.theme.green
 import com.example.todo.ui.design.theme.red
 import com.example.todo.ui.design.theme.white
-import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,7 +102,8 @@ fun SwipeBackground(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeContainer(
-    todoItemUiModel: TodoItemUiModel,
+    id: String,
+    isCompleted: Boolean,
     onDelete: (String) -> Unit,
     onCheckedChange: (String, Boolean) -> Unit,
     animationDuration: Int = 500,
@@ -118,7 +120,7 @@ fun SwipeContainer(
                     isRemoved = true
                 }
                 SwipeToDismissBoxValue.StartToEnd -> {
-                    onCheckedChange(todoItemUiModel.id, true)
+                    onCheckedChange(id, true)
                 }
                 SwipeToDismissBoxValue.Settled -> return@rememberSwipeToDismissBoxState false
             }
@@ -129,7 +131,7 @@ fun SwipeContainer(
     LaunchedEffect(key1 = isRemoved) {
         if(isRemoved) {
             delay(animationDuration.toLong())
-            onDelete(todoItemUiModel.id)
+            onDelete(id)
         }
     }
 
@@ -143,11 +145,35 @@ fun SwipeContainer(
         SwipeToDismissBox(
             state = state,
             backgroundContent = {
-                 SwipeBackground(swipeDismissState = state, todoItemUiModel.isCompleted)
+                 SwipeBackground(swipeDismissState = state, isCompleted)
             },
-            enableDismissFromStartToEnd = !todoItemUiModel.isCompleted
+            enableDismissFromStartToEnd = !isCompleted
         ){
             content()
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+fun SwipeBackgroundPreview(){
+    ToDoTheme {
+        SwipeBackground(
+            swipeDismissState = rememberSwipeToDismissBoxState(),
+            isCompleted = false
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SwipeContainerPreview(){
+    SwipeContainer(
+        id = "123",
+        isCompleted = false,
+        onCheckedChange = { _, _ -> },
+        onDelete = {  },
+        content = {  }
+    )
 }

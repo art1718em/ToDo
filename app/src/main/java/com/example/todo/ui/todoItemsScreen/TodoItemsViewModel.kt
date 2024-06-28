@@ -11,8 +11,11 @@ import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenState
 import com.example.todo.utils.DateFormatting
 import com.example.todo.utils.collectIn
 import com.example.todo.utils.countCompletedItems
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,6 +27,9 @@ class TodoItemsViewModel @Inject constructor(
 
     private var todoItems = listOf<TodoItemUiModel>()
 
+    private var loadingTodoItemsJob: Job? = null
+    private var updatingIsCompletedTodoItemJob: Job? = null
+
     private val _todoItemsScreenUiState = MutableStateFlow<TodoItemsScreenState>(TodoItemsScreenState.Loading)
     val todoItemsScreenUiState = _todoItemsScreenUiState.asStateFlow()
 
@@ -31,8 +37,9 @@ class TodoItemsViewModel @Inject constructor(
         collectTodoItems()
     }
 
-    private fun collectTodoItems(){
-        todoItemsRepository.todoItems.collectIn(viewModelScope){ todoItemsList ->
+    fun collectTodoItems(){
+        loadingTodoItemsJob?.cancel()
+        loadingTodoItemsJob = todoItemsRepository.todoItems.collectIn(viewModelScope){ todoItemsList ->
             val currentTodoItemsScreenUiState = todoItemsScreenUiState.value
             val isHidden = when(currentTodoItemsScreenUiState){
                 is TodoItemsScreenState.Success -> currentTodoItemsScreenUiState.isHiddenCompletedItems
@@ -49,14 +56,16 @@ class TodoItemsViewModel @Inject constructor(
                 isHiddenCompletedItems = isHidden,
             )
         }
-
     }
 
     fun updateIsCompeted(id: String, isChecked: Boolean){
-        todoItemsRepository.updateChecked(
-            id =  id,
-            isCompleted = isChecked,
-        )
+        updatingIsCompletedTodoItemJob?.cancel()
+        updatingIsCompletedTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
+            todoItemsRepository.updateChecked(
+                id =  id,
+                isCompleted = isChecked,
+            )
+        }
     }
 
     fun changeHiddenCompletedItems(isHiddenCompleted: Boolean){
@@ -72,7 +81,9 @@ class TodoItemsViewModel @Inject constructor(
     }
 
     fun deleteTodoItem(id: String){
-        todoItemsRepository.deleteItem(id)
+        viewModelScope.launch(Dispatchers.IO) {
+            todoItemsRepository.deleteItem(id)
+        }
     }
 
     fun navigateToTodoItemDetails(idOfTodoItem: String?){

@@ -7,7 +7,11 @@ class TodoItemDetailsPresenter @Inject constructor(
     private val todoItemDetailsViewModel: TodoItemDetailsViewModel,
 ) {
 
-    val todoItemDetailsUiModel = todoItemDetailsViewModel.todoItemDetailsUiModel
+    val todoItemDetailsScreenState = todoItemDetailsViewModel.todoItemDetailsScreenState
+
+    fun loadTodoItem(){
+        todoItemDetailsViewModel.loadTodoItem()
+    }
 
     fun updateText(text: String){
         todoItemDetailsViewModel.updateText(text)

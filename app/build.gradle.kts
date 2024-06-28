@@ -31,6 +31,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -61,6 +62,11 @@ dependencies {
     //Dagger 2
     implementation(libs.dagger)
     kapt(libs.dagger.compiler)
+
+    //Material DatePickerDialog
+    implementation(libs.core)
+    implementation(libs.datetime)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
