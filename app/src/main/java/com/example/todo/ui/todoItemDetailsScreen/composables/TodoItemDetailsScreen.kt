@@ -222,3 +222,26 @@ fun TodoItemDetailsPreview(){
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun TodoItemDetailsDarkThemePreview(){
+    ToDoTheme(
+        darkTheme = true,
+    ) {
+        TodoItemDetails(
+            TodoItemDetailsUiModel(
+                id = stringResource(id = R.string.text),
+                text = stringResource(id = R.string.text),
+                deadline = stringResource(id = R.string.text),
+                importance = Importance.Usual,
+            ),
+            onAddItem = {  },
+            onDeleteItem = {  },
+            onNavigateToItems = {  },
+            onUpdateImportance = {  },
+            onUpdateText = {  },
+            onUpdateDeadline = {  },
+        )
+    }
+}
