@@ -10,6 +10,7 @@ import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenState
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsUiModel
 import com.example.todo.utils.DateFormatting
+import com.example.todo.utils.UNKNOWN_MESSAGE
 import com.example.todo.utils.generateId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -53,12 +54,17 @@ class TodoItemDetailsViewModel @Inject constructor(
     fun loadTodoItem() {
         loadingTodoItemJob?.cancel()
         loadingTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            todoItem.value = repository.getItem(id!!)
-            _todoItemDetailsScreenState.value =
-                TodoItemDetailsScreenState.Success(todoItem.value.toTodoItemDetailsUiModel())
-            if (_todoItemDetailsScreenState.value is TodoItemDetailsScreenState.Success) {
+            val result = repository.getItem(id!!)
+            if (result.isSuccess){
+                todoItem.value = result.getOrThrow()
+                _todoItemDetailsScreenState.value =
+                    TodoItemDetailsScreenState.Success(todoItem.value.toTodoItemDetailsUiModel())
                 todoItemDetailsUiModel.value = todoItem.value.toTodoItemDetailsUiModel()
+            }else{
+                _todoItemDetailsScreenState.value =
+                    TodoItemDetailsScreenState.Error(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE)
             }
+
         }
     }
 
@@ -94,7 +100,7 @@ class TodoItemDetailsViewModel @Inject constructor(
         savingTodoItemJob?.cancel()
         val currentDateMillis = Calendar.getInstance().timeInMillis
         savingTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            repository.saveItem(
+            val result = repository.saveItem(
                 TodoItem(
                     id = todoItem.value.id.ifEmpty {
                         generateId()
@@ -119,8 +125,16 @@ class TodoItemDetailsViewModel @Inject constructor(
                     },
                 )
             )
+            if (result.isFailure) {
+                _todoItemDetailsScreenState.value =
+                    TodoItemDetailsScreenState.Error(
+                        result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE
+                    )
+            }
         }
-        navigateToItems()
+        if (_todoItemDetailsScreenState.value is TodoItemDetailsScreenState.Success){
+            navigateToItems()
+        }
     }
 
     fun navigateToItems() {

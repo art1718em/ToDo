@@ -18,8 +18,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.todo.R
 import com.example.todo.domain.model.Importance
-import com.example.todo.ui.design.BodyText
-import com.example.todo.ui.design.SubheadText
 import com.example.todo.ui.design.theme.ToDoTheme
 import com.example.todo.ui.design.theme.elevated
 import com.example.todo.ui.design.theme.red
@@ -42,12 +40,13 @@ fun ImportanceSelector(
             modifier = Modifier
                 .clickable { onOpenDateDialog() }
         ) {
-            BodyText(
+            Text(
                 text = stringResource(id = R.string.importance),
-                isLineThrough = false,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimary,
             )
 
-            SubheadText(
+            Text(
                 text = stringResource(
                     id = when (importance) {
                         is Importance.Usual -> R.string.no
@@ -59,6 +58,7 @@ fun ImportanceSelector(
                     is Importance.High -> MaterialTheme.colorScheme.red
                     else -> MaterialTheme.colorScheme.onTertiary
                 },
+                style = MaterialTheme.typography.headlineMedium,
             )
         }
     }

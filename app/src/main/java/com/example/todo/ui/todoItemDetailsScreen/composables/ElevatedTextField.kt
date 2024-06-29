@@ -7,6 +7,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -17,7 +18,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.todo.R
-import com.example.todo.ui.design.BodyText
 import com.example.todo.ui.design.theme.ToDoTheme
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsUiModel
 
@@ -54,10 +54,10 @@ fun ElevatedTextField(
             },
             minLines = 3,
             placeholder = {
-                BodyText(
+                Text(
                     text = stringResource(id = R.string.what_needs_to_be_done),
                     color = MaterialTheme.colorScheme.onTertiary,
-                    isLineThrough = false,
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             },
             colors = TextFieldDefaults.textFieldColors(

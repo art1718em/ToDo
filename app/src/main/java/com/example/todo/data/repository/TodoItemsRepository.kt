@@ -119,45 +119,65 @@ class TodoItemsRepository @Inject constructor(){
     )
     val todoItems: StateFlow<List<TodoItem>> get()= _todoItems
 
-    suspend fun updateChecked(id: String, isCompleted: Boolean){
-        withContext(Dispatchers.IO){
-            _todoItems.update {
-                it.map { item ->
-                    if (item.id == id) item.copy(isCompleted = isCompleted) else item
+    suspend fun updateChecked(id: String, isCompleted: Boolean): Result<Unit>{
+        return withContext(Dispatchers.IO){
+            try {
+                _todoItems.update {
+                    it.map { item ->
+                        if (item.id == id) item.copy(isCompleted = isCompleted) else item
+                    }
                 }
+                Result.success(Unit)
+            }catch (e: Exception){
+                Result.failure(e)
             }
+
         }
     }
 
-    suspend fun saveItem(todoItem: TodoItem) {
-        withContext(Dispatchers.IO) {
-            val updatedList = _todoItems.value.map { item ->
-                if (item.id == todoItem.id) {
-                    todoItem
-                } else {
-                    item
-                }
-            }
-            if (updatedList.none { it.id == todoItem.id }) {
-                _todoItems.value = updatedList + todoItem
-            } else {
-                _todoItems.value = updatedList
-            }
-        }
-    }
-
-    suspend fun deleteItem(id: String){
-        withContext(Dispatchers.IO) {
-            _todoItems.update { currentList ->
-                currentList.filterNot { it.id == id }
-            }
-        }
-    }
-
-    // костыль в виде возврата пустого TodoItem будет исправлен, когда будет бэк и возврат Result
-    suspend fun getItem(id: String): TodoItem{
+    suspend fun saveItem(todoItem: TodoItem): Result<Unit> {
         return withContext(Dispatchers.IO) {
-            todoItems.value.firstOrNull { it.id == id } ?: TodoItem()
+            try {
+                val updatedList = _todoItems.value.map { item ->
+                    if (item.id == todoItem.id) {
+                        todoItem
+                    } else {
+                        item
+                    }
+                }
+                if (updatedList.none { it.id == todoItem.id }) {
+                    _todoItems.value = updatedList + todoItem
+                } else {
+                    _todoItems.value = updatedList
+                }
+                Result.success(Unit)
+            }catch (e: Exception){
+                Result.failure(e)
+
+            }
+        }
+    }
+
+    suspend fun deleteItem(id: String): Result<Unit>{
+        return withContext(Dispatchers.IO) {
+            try {
+                _todoItems.update { currentList ->
+                    currentList.filterNot { it.id == id }
+                }
+                Result.success(Unit)
+            }catch (e: Exception){
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun getItem(id: String): Result<TodoItem>{
+        return withContext(Dispatchers.IO) {
+            try {
+                Result.success(todoItems.value.first { it.id == id })
+            }catch (e:Exception){
+                Result.failure(e)
+            }
         }
     }
 }

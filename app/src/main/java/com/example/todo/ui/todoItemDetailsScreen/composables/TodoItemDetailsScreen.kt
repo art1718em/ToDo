@@ -18,6 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,7 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.todo.R
 import com.example.todo.domain.model.Importance
-import com.example.todo.ui.design.BodyText
 import com.example.todo.ui.design.ErrorScreen
 import com.example.todo.ui.design.ProgressBar
 import com.example.todo.ui.design.theme.ToDoTheme
@@ -180,14 +180,14 @@ fun TodoItemDetails(
                         imageVector = Icons.Default.Delete,
                         contentDescription = stringResource(id = R.string.icon_delete),
                     )
-                    BodyText(
+                    Text(
                         text = stringResource(id = R.string.delete),
+                        style = MaterialTheme.typography.bodyMedium,
                         color = if (todoItemDetailsUiModel.id.isNotEmpty()) {
                             MaterialTheme.colorScheme.red
                         } else {
                             MaterialTheme.colorScheme.disable
                         },
-                        isLineThrough = false,
                     )
                 }
             }

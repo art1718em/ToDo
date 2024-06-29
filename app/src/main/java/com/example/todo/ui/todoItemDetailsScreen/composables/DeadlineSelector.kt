@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,8 +18,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.todo.R
-import com.example.todo.ui.design.BodyText
-import com.example.todo.ui.design.SubheadText
 import com.example.todo.ui.design.theme.ToDoTheme
 import com.example.todo.ui.design.theme.blue
 import com.example.todo.ui.design.theme.switchThumbUnchecked
@@ -54,14 +53,16 @@ fun DeadlineSelector(
                 Modifier
             },
         ) {
-            BodyText(
+            Text(
                 text = stringResource(id = R.string.make_it_to),
-                isLineThrough = false,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimary,
             )
 
-            SubheadText(
+            Text(
                 text = deadline ?: "",
                 color = MaterialTheme.colorScheme.blue,
+                style = MaterialTheme.typography.headlineMedium,
             )
         }
         Switch(

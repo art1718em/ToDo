@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,7 +20,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.todo.R
 import com.example.todo.domain.model.Importance
-import com.example.todo.ui.design.BodyText
 import com.example.todo.ui.design.theme.ToDoTheme
 import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 
@@ -27,6 +29,7 @@ fun ElevatedLazyColumn(
     onDeleteItem: (String) -> Unit,
     onCheckedChange: (String, Boolean) -> Unit,
     onNavigateToDetails: (String?) -> Unit,
+    state: LazyListState,
 ){
     ElevatedCard(
         modifier = Modifier
@@ -42,6 +45,7 @@ fun ElevatedLazyColumn(
         LazyColumn(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface),
+            state = state,
         ) {
             items(items = todoItems, key = {it.id}) { todoItem ->
                 SwipeContainer(
@@ -68,10 +72,10 @@ fun ElevatedLazyColumn(
                     TextButton(
                         onClick = { onNavigateToDetails(null) }
                     ) {
-                        BodyText(
+                        Text(
                             text = stringResource(id = R.string.text_new),
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onTertiary,
-                            isLineThrough = false,
                         )
                     }
                 }
@@ -97,6 +101,7 @@ fun ElevatedLazyColumnPreview(){
             onDeleteItem = {  },
             onCheckedChange = { _, _ -> },
             onNavigateToDetails = {  },
+            state = rememberLazyListState(),
         )
     }
 }

@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
@@ -25,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.todo.R
-import com.example.todo.ui.design.ButtonText
 import com.example.todo.ui.design.theme.ToDoTheme
 import com.example.todo.ui.design.theme.blue
 
@@ -66,8 +66,10 @@ fun TodoItemDetailsToolBar(
                     ),
                     onClick = { onAddItem() }
                 ) {
-                    ButtonText(
-                        text = stringResource(id = R.string.save),
+                    Text(
+                        text = stringResource(id = R.string.save).uppercase(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.blue,
                     )
                 }
 

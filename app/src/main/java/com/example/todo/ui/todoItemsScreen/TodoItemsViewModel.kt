@@ -1,14 +1,17 @@
 package com.example.todo.ui.todoItemsScreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.todo.data.repository.TodoItemsRepository
 import com.example.todo.domain.model.TodoItem
 import com.example.todo.navigation.Screen
+import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenState
 import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenState
 import com.example.todo.utils.DateFormatting
+import com.example.todo.utils.UNKNOWN_MESSAGE
 import com.example.todo.utils.collectIn
 import com.example.todo.utils.countCompletedItems
 import kotlinx.coroutines.Dispatchers
@@ -82,7 +85,11 @@ class TodoItemsViewModel @Inject constructor(
 
     fun deleteTodoItem(id: String){
         viewModelScope.launch(Dispatchers.IO) {
-            todoItemsRepository.deleteItem(id)
+            val result = todoItemsRepository.deleteItem(id)
+            if (result.isFailure){
+                _todoItemsScreenUiState.value =
+                    TodoItemsScreenState.Error(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE)
+            }
         }
     }
 

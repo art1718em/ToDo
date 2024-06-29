@@ -12,16 +12,16 @@ import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.todo.R
 import com.example.todo.domain.model.Importance
-import com.example.todo.ui.design.BodyText
-import com.example.todo.ui.design.SubheadText
 import com.example.todo.ui.design.theme.gray
 import com.example.todo.ui.design.theme.green
 import com.example.todo.ui.design.theme.pink
@@ -99,14 +99,18 @@ fun TodoItemRow(
                     .fillMaxHeight()
                     .padding(start = 4.dp),
             ) {
-                BodyText(
+                Text(
                     text = todoItem.text,
+                    style = if (todoItem.isCompleted) MaterialTheme.typography.bodySmall else MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     maxLines = 3,
-                    isLineThrough = todoItem.isCompleted,
+                    overflow = TextOverflow.Ellipsis,
                 )
 
-                SubheadText(
+                Text(
                     text = todoItem.deadline ?: "",
+                    color = MaterialTheme.colorScheme.onTertiary,
+                    style = MaterialTheme.typography.headlineMedium,
                 )
             }
         }
