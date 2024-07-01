@@ -1,14 +1,17 @@
 package com.example.todo.ui.todoItemDetailsScreen
 
 import com.example.todo.domain.model.Importance
-import java.util.Date
 import javax.inject.Inject
 
 class TodoItemDetailsPresenter @Inject constructor(
     private val todoItemDetailsViewModel: TodoItemDetailsViewModel,
 ) {
 
-    val todoItemDetailsUiModel = todoItemDetailsViewModel.todoItemDetailsUiModel
+    val todoItemDetailsScreenState = todoItemDetailsViewModel.todoItemDetailsScreenState
+
+    fun loadTodoItem(){
+        todoItemDetailsViewModel.loadTodoItem()
+    }
 
     fun updateText(text: String){
         todoItemDetailsViewModel.updateText(text)
@@ -18,7 +21,7 @@ class TodoItemDetailsPresenter @Inject constructor(
         todoItemDetailsViewModel.updateImportance(importance)
     }
 
-    fun updateDeadline(deadline: Date?){
+    fun updateDeadline(deadline: Long?){
         todoItemDetailsViewModel.updateDeadline(deadline)
     }
 

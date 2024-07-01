@@ -10,6 +10,10 @@ class TodoItemsPresenter @Inject constructor(
 ){
     val todoItemsScreenUiState = todoItemsViewModel.todoItemsScreenUiState
 
+    fun loadTodoItems(){
+        todoItemsViewModel.collectTodoItems()
+    }
+
     fun updateIsCompleted(id: String, isChecked: Boolean){
         todoItemsViewModel.updateIsCompeted(id, isChecked)
     }
@@ -18,7 +22,11 @@ class TodoItemsPresenter @Inject constructor(
         todoItemsViewModel.changeHiddenCompletedItems(isHiddenCompletedItems)
     }
 
-    fun navigateToItemDetails(id: String){
+    fun deleteItem(id: String){
+        todoItemsViewModel.deleteTodoItem(id)
+    }
+
+    fun navigateToItemDetails(id: String?){
         todoItemsViewModel.navigateToTodoItemDetails(id)
     }
 }

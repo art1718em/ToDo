@@ -8,7 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.todo.ui.design.theme.ToDoTheme
 import com.example.todo.ui.design.theme.blue
 
 @Composable
@@ -23,5 +25,13 @@ fun ProgressBar(){
                 .size(48.dp),
             color = MaterialTheme.colorScheme.blue,
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProgressBarPreview(){
+    ToDoTheme {
+        ProgressBar()
     }
 }

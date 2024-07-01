@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
@@ -25,6 +26,7 @@ private val DarkColorScheme = darkColorScheme(
     surface = md_theme_dark_surface,
     background = md_theme_dark_background,
 )
+
 val ColorScheme.elevated: Color
     @Composable
     get() = if (isSystemInDarkTheme()) md_theme_dark_elevated else md_theme_light_elevated
@@ -115,5 +117,13 @@ fun ToDoTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
+    )
+}
+
+@Preview
+@Composable
+fun LightColors(){
+    val lightColors = listOf(
+        "Support [Light] Separator" to MaterialTheme.colorScheme.outline,
     )
 }
