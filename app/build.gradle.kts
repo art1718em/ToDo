@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("kotlin-kapt")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -67,6 +68,15 @@ dependencies {
     implementation(libs.core)
     implementation(libs.datetime)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    //Ktor
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.auth)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging.jvm)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

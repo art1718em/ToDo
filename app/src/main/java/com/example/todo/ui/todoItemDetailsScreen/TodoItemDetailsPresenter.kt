@@ -9,6 +9,8 @@ class TodoItemDetailsPresenter @Inject constructor(
 
     val todoItemDetailsScreenState = todoItemDetailsViewModel.todoItemDetailsScreenState
 
+    val todoItemDetailsScreenUiEffects = todoItemDetailsViewModel.effectFlow
+
     fun loadTodoItem(){
         todoItemDetailsViewModel.loadTodoItem()
     }

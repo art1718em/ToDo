@@ -1,7 +1,9 @@
 package com.example.todo.ui.todoItemsScreen.composables
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,10 +26,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,6 +47,8 @@ import com.example.todo.ui.design.theme.white
 import com.example.todo.ui.todoItemsScreen.TodoItemsPresenter
 import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenState
+import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenUiEffects
+import kotlinx.coroutines.flow.SharedFlow
 
 @Composable
 fun TodoItemsScreen(
@@ -49,6 +56,9 @@ fun TodoItemsScreen(
 ) {
 
     val todoItemsScreenState = presenter.todoItemsScreenUiState.collectAsState().value
+
+    ShowUiEffectIfNeeded(todoItemsScreenUiEffects = presenter.todoItemsScreenUiEffects)
+
     when (todoItemsScreenState) {
         is TodoItemsScreenState.Loading -> ProgressBar()
         is TodoItemsScreenState.Success -> ListTodoItems(
@@ -115,10 +125,10 @@ fun ListTodoItems(
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             ElevatedLazyColumn(
                 state = scrollState,
@@ -178,5 +188,27 @@ fun ListTodoItemsDarkThemePreview(){
             onDeleteItem = {  },
             onNavigateToDetails = {  },
         )
+    }
+}
+
+@Composable
+private fun ShowUiEffectIfNeeded(
+    todoItemsScreenUiEffects: SharedFlow<TodoItemsScreenUiEffects>,
+){
+
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = Unit) {
+        todoItemsScreenUiEffects.collect{todoItemsScreenUiEffect ->
+            when(todoItemsScreenUiEffect){
+                is TodoItemsScreenUiEffects.ShowErrorMessage -> {
+                    Toast.makeText(
+                        context,
+                        todoItemsScreenUiEffect.message,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
+        }
     }
 }

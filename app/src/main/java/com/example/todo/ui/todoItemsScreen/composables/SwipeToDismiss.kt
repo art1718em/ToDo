@@ -115,17 +115,18 @@ fun SwipeContainer(
 
     val state = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            when(it){
+            when (it) {
                 SwipeToDismissBoxValue.EndToStart -> {
                     isRemoved = true
+                    true
                 }
                 SwipeToDismissBoxValue.StartToEnd -> {
                     onCheckedChange(id, true)
+                    false
                 }
-                SwipeToDismissBoxValue.Settled -> return@rememberSwipeToDismissBoxState false
+                SwipeToDismissBoxValue.Settled -> false
             }
-            return@rememberSwipeToDismissBoxState true
-        },
+        }
     )
 
     LaunchedEffect(key1 = isRemoved) {

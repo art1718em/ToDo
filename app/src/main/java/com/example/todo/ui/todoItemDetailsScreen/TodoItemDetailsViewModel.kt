@@ -1,5 +1,6 @@
 package com.example.todo.ui.todoItemDetailsScreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -8,14 +9,17 @@ import com.example.todo.domain.model.Importance
 import com.example.todo.domain.model.TodoItem
 import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenState
+import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenUiEffects
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsUiModel
+import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenUiEffects
 import com.example.todo.utils.DateFormatting
 import com.example.todo.utils.UNKNOWN_MESSAGE
 import com.example.todo.utils.generateId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -30,9 +34,11 @@ class TodoItemDetailsViewModel @Inject constructor(
         MutableStateFlow<TodoItemDetailsScreenState>(TodoItemDetailsScreenState.Loading)
     val todoItemDetailsScreenState = _todoItemDetailsScreenState.asStateFlow()
 
-    private val todoItemDetailsUiModel = MutableStateFlow(TodoItemDetailsUiModel())
+    private val _effectFlow = MutableSharedFlow<TodoItemDetailsScreenUiEffects>()
+    val effectFlow = _effectFlow.asSharedFlow()
 
-    private val todoItem = MutableStateFlow(TodoItem())
+
+    private val todoItem = MutableStateFlow(TodoItem.defaultTodoItem)
 
     private var loadingTodoItemJob: Job? = null
     private var savingTodoItemJob: Job? = null
@@ -44,70 +50,75 @@ class TodoItemDetailsViewModel @Inject constructor(
         ?.getString("id")
 
     init {
-        if (id != null)
-            loadTodoItem()
-        else
-            _todoItemDetailsScreenState.value =
-                TodoItemDetailsScreenState.Success(TodoItemDetailsUiModel())
+        loadTodoItem()
     }
 
     fun loadTodoItem() {
+        if (id == null) {
+            _todoItemDetailsScreenState.value =
+                TodoItemDetailsScreenState.Success(TodoItemDetailsUiModel())
+            return
+        }
         loadingTodoItemJob?.cancel()
         loadingTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            val result = repository.getItem(id!!)
+            val result = repository.getItem(id)
             if (result.isSuccess){
                 todoItem.value = result.getOrThrow()
                 _todoItemDetailsScreenState.value =
                     TodoItemDetailsScreenState.Success(todoItem.value.toTodoItemDetailsUiModel())
-                todoItemDetailsUiModel.value = todoItem.value.toTodoItemDetailsUiModel()
-            }else{
+            } else {
                 _todoItemDetailsScreenState.value =
                     TodoItemDetailsScreenState.Error(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE)
             }
-
         }
     }
 
     fun updateText(text: String) {
-        todoItemDetailsUiModel.value = todoItemDetailsUiModel.value.copy(
-            text = text
-        )
-        _todoItemDetailsScreenState.value = TodoItemDetailsScreenState.Success(
-            todoItemDetailsUiModel = todoItemDetailsUiModel.value
-        )
-
+        val currentTodoItemDetailsScreenState = todoItemDetailsScreenState.value
+        if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success){
+            _todoItemDetailsScreenState.value = TodoItemDetailsScreenState.Success(
+                currentTodoItemDetailsScreenState.todoItemDetailsUiModel.copy(
+                    text = text
+                )
+            )
+        }
     }
 
     fun updateImportance(importance: Importance) {
-        todoItemDetailsUiModel.value = todoItemDetailsUiModel.value.copy(
-            importance = importance,
-        )
-        _todoItemDetailsScreenState.value = TodoItemDetailsScreenState.Success(
-            todoItemDetailsUiModel = todoItemDetailsUiModel.value
-        )
+        val currentTodoItemDetailsScreenState = todoItemDetailsScreenState.value
+        if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success){
+            _todoItemDetailsScreenState.value = TodoItemDetailsScreenState.Success(
+                currentTodoItemDetailsScreenState.todoItemDetailsUiModel.copy(
+                    importance = importance
+                )
+            )
+        }
     }
 
     fun updateDeadline(deadline: Long?) {
-        todoItemDetailsUiModel.value = todoItemDetailsUiModel.value.copy(
-            deadline = DateFormatting.toFormattedDate(deadline),
-        )
-        _todoItemDetailsScreenState.value = TodoItemDetailsScreenState.Success(
-            todoItemDetailsUiModel = todoItemDetailsUiModel.value
-        )
+        val currentTodoItemDetailsScreenState = todoItemDetailsScreenState.value
+        if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success){
+            _todoItemDetailsScreenState.value = TodoItemDetailsScreenState.Success(
+                currentTodoItemDetailsScreenState.todoItemDetailsUiModel.copy(
+                    deadline = DateFormatting.toFormattedDate(deadline)
+                )
+            )
+        }
     }
 
     fun saveItem() {
         savingTodoItemJob?.cancel()
         val currentDateMillis = Calendar.getInstance().timeInMillis
-        savingTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            val result = repository.saveItem(
-                TodoItem(
+        savingTodoItemJob = viewModelScope.launch {
+            val currentTodoItemDetailsScreenState = todoItemDetailsScreenState.value
+            if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success) {
+                val item = TodoItem(
                     id = todoItem.value.id.ifEmpty {
                         generateId()
                     },
-                    text = todoItemDetailsUiModel.value.text,
-                    deadline = DateFormatting.toDateLong(todoItemDetailsUiModel.value.deadline),
-                    importance = todoItemDetailsUiModel.value.importance,
+                    text = currentTodoItemDetailsScreenState.todoItemDetailsUiModel.text,
+                    deadline = DateFormatting.toDateLong(currentTodoItemDetailsScreenState.todoItemDetailsUiModel.deadline),
+                    importance = currentTodoItemDetailsScreenState.todoItemDetailsUiModel.importance,
                     isCompleted = if (todoItem.value.id.isEmpty()) {
                         false
                     } else {
@@ -118,24 +129,25 @@ class TodoItemDetailsViewModel @Inject constructor(
                     } else {
                         todoItem.value.dateOfCreation
                     },
-                    dateOfChange = if (todoItem.value.id.isEmpty()) {
-                        null
-                    } else {
-                        currentDateMillis
-                    },
+                    dateOfChange = currentDateMillis,
                 )
-            )
-            if (result.isFailure) {
-                _todoItemDetailsScreenState.value =
-                    TodoItemDetailsScreenState.Error(
-                        result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE
-                    )
+
+                val result = if (todoItem.value.id.isEmpty()){
+                    repository.addTodoItem(item)
+                } else {
+                    repository.updateTodoItem(item)
+                }
+
+                if (result.isSuccess){
+                    navigateToItems()
+                } else {
+                    _effectFlow.emit(TodoItemDetailsScreenUiEffects.ShowErrorMessage(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE))
+                }
+
             }
         }
-        if (_todoItemDetailsScreenState.value is TodoItemDetailsScreenState.Success){
-            navigateToItems()
-        }
     }
+
 
     fun navigateToItems() {
         loadingTodoItemJob?.cancel()
@@ -144,18 +156,23 @@ class TodoItemDetailsViewModel @Inject constructor(
 
     fun deleteTodoItem() {
         deletionTodoItemJob?.cancel()
-        deletionTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteItem(todoItem.value.id)
+        deletionTodoItemJob = viewModelScope.launch {
+            val result = repository.deleteItem(todoItem.value.id)
+            if (result.isSuccess){
+                navigateToItems()
+            } else {
+                _effectFlow.emit(TodoItemDetailsScreenUiEffects.ShowErrorMessage(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE))
+            }
         }
-        navigateToItems()
+    }
+
+    private fun TodoItem.toTodoItemDetailsUiModel(): TodoItemDetailsUiModel {
+        return TodoItemDetailsUiModel(
+            id = id,
+            text = text,
+            importance = importance,
+            deadline = DateFormatting.toFormattedDate(deadline),
+        )
     }
 }
 
-fun TodoItem.toTodoItemDetailsUiModel(): TodoItemDetailsUiModel {
-    return TodoItemDetailsUiModel(
-        id = id,
-        text = text,
-        importance = importance,
-        deadline = DateFormatting.toFormattedDate(deadline),
-    )
-}

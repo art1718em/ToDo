@@ -14,6 +14,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -34,11 +35,14 @@ fun TodoItemsToolBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onChangeHiddenCompletedItems: (Boolean) -> Unit,
 ) {
+
+    val shadowPadding by remember {
+        derivedStateOf { if (scrollState.firstVisibleItemScrollOffset == 0) 0.dp else 8.dp }
+    }
+
     LargeTopAppBar(
         modifier = Modifier
-            .shadow(
-                if (remember { derivedStateOf { scrollState.firstVisibleItemScrollOffset } }.value == 0) 0.dp else 8.dp
-            ),
+            .shadow(shadowPadding),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background
