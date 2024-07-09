@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,54 +32,49 @@ fun ElevatedLazyColumn(
     onCheckedChange: (String, Boolean) -> Unit,
     onNavigateToDetails: (String?) -> Unit,
     state: LazyListState,
-){
-    ElevatedCard(
+) {
+    LazyColumn(
         modifier = Modifier
+            .padding(bottom = 8.dp)
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 8.dp
-        ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+            .padding(horizontal = 8.dp)
+            .shadow(
+                elevation = 1.dp,
+                shape = RoundedCornerShape(16.dp),
+            )
+            .background(MaterialTheme.colorScheme.surface),
+        state = state,
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface),
-            state = state,
-        ) {
-            items(items = todoItems, key = {it.id}) { todoItem ->
-                SwipeContainer(
-                    id = todoItem.id,
-                    isCompleted = todoItem.isCompleted,
-                    onDelete = onDeleteItem,
-                    onCheckedChange = onCheckedChange
-                ) {
-                    TodoItemRow(
-                        todoItem = todoItem,
-                        onCheckedChange = onCheckedChange,
-                        onNavigateToDetails = onNavigateToDetails,
-                    )
-                }
+        items(items = todoItems, key = { it.id }) { todoItem ->
+            SwipeContainer(
+                id = todoItem.id,
+                isCompleted = todoItem.isCompleted,
+                onDelete = onDeleteItem,
+                onCheckedChange = onCheckedChange
+            ) {
+                TodoItemRow(
+                    todoItem = todoItem,
+                    onCheckedChange = onCheckedChange,
+                    onNavigateToDetails = onNavigateToDetails,
+                )
             }
+        }
 
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(start = 52.dp, bottom = 20.dp, top = 12.dp),
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(start = 52.dp, bottom = 20.dp, top = 12.dp),
+            ) {
+                TextButton(
+                    onClick = { onNavigateToDetails(null) }
                 ) {
-                    TextButton(
-                        onClick = { onNavigateToDetails(null) }
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.text_new),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onTertiary,
-                        )
-                    }
+                    Text(
+                        text = stringResource(id = R.string.text_new),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onTertiary,
+                    )
                 }
             }
         }
@@ -86,7 +83,7 @@ fun ElevatedLazyColumn(
 
 @Preview
 @Composable
-fun ElevatedLazyColumnPreview(){
+fun ElevatedLazyColumnPreview() {
     ToDoTheme {
         ElevatedLazyColumn(
             todoItems = listOf(
@@ -98,9 +95,9 @@ fun ElevatedLazyColumnPreview(){
                     importance = Importance.Usual,
                 )
             ),
-            onDeleteItem = {  },
+            onDeleteItem = { },
             onCheckedChange = { _, _ -> },
-            onNavigateToDetails = {  },
+            onNavigateToDetails = { },
             state = rememberLazyListState(),
         )
     }

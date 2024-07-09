@@ -4,6 +4,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -19,11 +20,15 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.todo.R
 import com.example.todo.ui.design.theme.ToDoTheme
@@ -38,17 +43,20 @@ fun TodoItemDetailsToolBar(
     onNavigateToItems: () -> Unit,
     onAddItem: () -> Unit,
 ){
+
+    val shadowPadding by remember {
+        derivedStateOf { if (scrollState.value == 0) 0.dp else 8.dp }
+    }
+
     TopAppBar(
         modifier = Modifier
-            .shadow(
-                if (scrollState.value == 0) 0.dp else 8.dp
-            )
+            .shadow(shadowPadding)
             .fillMaxWidth()
             .nestedScroll(behavior.nestedScrollConnection),
         navigationIcon = {
-            IconButton(onClick = {
-                onNavigateToItems()
-            }) {
+            IconButton(
+                onClick = onNavigateToItems
+            ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(id = R.string.icon_close),
@@ -99,3 +107,4 @@ fun TodoItemDetailsToolBarPreview(){
         )
     }
 }
+
