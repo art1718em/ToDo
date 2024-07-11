@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.todo.data.repository.TodoItemsRepository
+import com.example.todo.di.todoItemDetailsScreen.TodoItemDetailsFragmentScope
 import com.example.todo.domain.model.Importance
 import com.example.todo.domain.model.TodoItem
+import com.example.todo.navigation.NavManager
 import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenState
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenUiEffects
@@ -21,13 +23,15 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
+@TodoItemDetailsFragmentScope
 class TodoItemDetailsViewModel @Inject constructor(
     private val repository: TodoItemsRepository,
-    private val navController: NavController,
+    private val navManager: NavManager,
 ) : ViewModel() {
 
     private val _todoItemDetailsScreenState =
@@ -44,31 +48,29 @@ class TodoItemDetailsViewModel @Inject constructor(
     private var savingTodoItemJob: Job? = null
     private var deletionTodoItemJob: Job? = null
 
-    private val id: String? = navController
-        .getBackStackEntry("${Screen.TodoItemDetailsScreen.route}/{id}")
-        .arguments
-        ?.getString("id")
 
     init {
         loadTodoItem()
     }
 
     fun loadTodoItem() {
-        if (id == null) {
-            _todoItemDetailsScreenState.value =
-                TodoItemDetailsScreenState.Success(TodoItemDetailsUiModel())
-            return
-        }
-        loadingTodoItemJob?.cancel()
         loadingTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            val result = repository.getItem(id)
-            if (result.isSuccess){
-                todoItem.value = result.getOrThrow()
-                _todoItemDetailsScreenState.value =
-                    TodoItemDetailsScreenState.Success(todoItem.value.toTodoItemDetailsUiModel())
-            } else {
-                _todoItemDetailsScreenState.value =
-                    TodoItemDetailsScreenState.Error(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE)
+            navManager.todoItemId.collect{id ->
+                if (id == null) {
+                    _todoItemDetailsScreenState.value =
+                        TodoItemDetailsScreenState.Success(TodoItemDetailsUiModel())
+                    return@collect
+                }
+                loadingTodoItemJob?.cancel()
+                val result = repository.getItem(id)
+                if (result.isSuccess){
+                    todoItem.value = result.getOrThrow()
+                    _todoItemDetailsScreenState.value =
+                        TodoItemDetailsScreenState.Success(todoItem.value.toTodoItemDetailsUiModel())
+                } else {
+                    _todoItemDetailsScreenState.value =
+                        TodoItemDetailsScreenState.Error(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE)
+                }
             }
         }
     }
@@ -151,7 +153,7 @@ class TodoItemDetailsViewModel @Inject constructor(
 
     fun navigateToItems() {
         loadingTodoItemJob?.cancel()
-        navController.popBackStack()
+        navManager.navigateBack()
     }
 
     fun deleteTodoItem() {

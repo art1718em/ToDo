@@ -1,6 +1,7 @@
 package com.example.todo.data.repository
 
 import com.example.todo.data.network.TodoItemApi
+import com.example.todo.di.activity.MainActivityScope
 import com.example.todo.domain.mapper.Mapper
 import com.example.todo.domain.model.TodoItem
 import com.example.todo.utils.NOT_FOUND_ITEM_MESSAGE
@@ -12,7 +13,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+@MainActivityScope
 class TodoItemsRepository @Inject constructor(
     private val todoItemApi: TodoItemApi,
     private val mapper: Mapper,

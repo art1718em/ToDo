@@ -6,8 +6,12 @@ import com.example.todo.di.app.DaggerAppComponent
 
 class App: Application() {
 
-    val appComponent: AppComponent by lazy {
-        DaggerAppComponent.create()
+    lateinit var appComponent: AppComponent
+        private set
+
+    override fun onCreate() {
+        super.onCreate()
+        appComponent = DaggerAppComponent.create()
     }
 
 }

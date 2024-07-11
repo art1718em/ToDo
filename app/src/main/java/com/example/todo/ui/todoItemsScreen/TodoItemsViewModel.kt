@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.todo.data.repository.TodoItemsRepository
+import com.example.todo.di.todoItemsScreen.TodoItemsFragmentScope
 import com.example.todo.domain.model.TodoItem
+import com.example.todo.navigation.NavManager
 import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenState
@@ -24,10 +26,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+@TodoItemsFragmentScope
 class TodoItemsViewModel @Inject constructor(
     private val todoItemsRepository: TodoItemsRepository,
-    private val navController: NavController,
+    private val navManager: NavManager,
 ) : ViewModel() {
 
     private var todoItems = listOf<TodoItemUiModel>()
@@ -121,7 +123,7 @@ class TodoItemsViewModel @Inject constructor(
     }
 
     fun navigateToTodoItemDetails(idOfTodoItem: String?){
-        navController.navigate("${Screen.TodoItemDetailsScreen.route}/${idOfTodoItem}")
+        navManager.navigateToSecondFragment(idOfTodoItem)
     }
 
 }
