@@ -3,17 +3,15 @@ package com.example.todo.ui.todoItemDetailsScreen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
-import com.example.todo.data.repository.TodoItemsRepository
+import com.example.todo.data.repository.NetworkTodoItemsRepository
 import com.example.todo.di.todoItemDetailsScreen.TodoItemDetailsFragmentScope
+import com.example.todo.domain.interactor.TodoItemsInteractor
 import com.example.todo.domain.model.Importance
 import com.example.todo.domain.model.TodoItem
 import com.example.todo.navigation.NavManager
-import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenState
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenUiEffects
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsUiModel
-import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenUiEffects
 import com.example.todo.utils.DateFormatting
 import com.example.todo.utils.UNKNOWN_MESSAGE
 import com.example.todo.utils.generateId
@@ -23,14 +21,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
 @TodoItemDetailsFragmentScope
 class TodoItemDetailsViewModel @Inject constructor(
-    private val repository: TodoItemsRepository,
+    private val interactor: TodoItemsInteractor,
     private val navManager: NavManager,
 ) : ViewModel() {
 
@@ -61,8 +58,7 @@ class TodoItemDetailsViewModel @Inject constructor(
                         TodoItemDetailsScreenState.Success(TodoItemDetailsUiModel())
                     return@collect
                 }
-                loadingTodoItemJob?.cancel()
-                val result = repository.getItem(id)
+                val result = interactor.getItem(id)
                 if (result.isSuccess){
                     todoItem.value = result.getOrThrow()
                     _todoItemDetailsScreenState.value =
@@ -135,9 +131,9 @@ class TodoItemDetailsViewModel @Inject constructor(
                 )
 
                 val result = if (todoItem.value.id.isEmpty()){
-                    repository.addTodoItem(item)
+                    interactor.addTodoItem(item)
                 } else {
-                    repository.updateTodoItem(item)
+                    interactor.updateTodoItem(item)
                 }
 
                 if (result.isSuccess){
@@ -159,7 +155,7 @@ class TodoItemDetailsViewModel @Inject constructor(
     fun deleteTodoItem() {
         deletionTodoItemJob?.cancel()
         deletionTodoItemJob = viewModelScope.launch {
-            val result = repository.deleteItem(todoItem.value.id)
+            val result = interactor.deleteTodoItem(todoItem.value.id)
             if (result.isSuccess){
                 navigateToItems()
             } else {

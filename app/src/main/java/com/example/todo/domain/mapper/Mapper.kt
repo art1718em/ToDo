@@ -1,5 +1,6 @@
 package com.example.todo.domain.mapper
 
+import com.example.todo.data.local.TodoItemEntity
 import com.example.todo.data.network.dto.TodoItemPost
 import com.example.todo.data.network.dto.TodoItemDto
 import com.example.todo.domain.model.Importance
@@ -23,7 +24,7 @@ class Mapper @Inject constructor() {
             color = "#FFFFFF",
             deadLine = todoItem.deadline,
             isCompleted = todoItem.isCompleted,
-            dateOfCreation =  todoItem.dateOfCreation,
+            dateOfCreation = todoItem.dateOfCreation,
             dateOfChange = todoItem.dateOfChange,
             user = "1",
         )
@@ -40,6 +41,31 @@ class Mapper @Inject constructor() {
             dateOfChange = todoItemDto.dateOfChange,
         )
     }
+
+    fun mapEntityToModel(todoItemEntity: TodoItemEntity): TodoItem {
+        return TodoItem(
+            id = todoItemEntity.id,
+            text = todoItemEntity.text,
+            importance = todoItemEntity.importance.toImportance(),
+            deadline = todoItemEntity.deadline,
+            isCompleted = todoItemEntity.isCompleted,
+            dateOfCreation = todoItemEntity.dateOfCreation,
+            dateOfChange = todoItemEntity.dateOfChange,
+        )
+    }
+
+    fun mapModelToEntity(todoItem: TodoItem): TodoItemEntity{
+        return TodoItemEntity(
+            id = todoItem.id,
+            text = todoItem.text,
+            importance = todoItem.importance.toStringImportance(),
+            deadline = todoItem.deadline,
+            isCompleted = todoItem.isCompleted,
+            dateOfCreation = todoItem.dateOfCreation,
+            dateOfChange = todoItem.dateOfChange,
+        )
+    }
+
 }
 
 private fun String.toImportance(): Importance = when (this.lowercase()) {

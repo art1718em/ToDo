@@ -1,6 +1,11 @@
 package com.example.todo.di.network
 
+import android.content.Context
 import android.util.Log
+import androidx.room.Room
+import com.example.todo.data.local.TodoItemDao
+import com.example.todo.data.local.TodoItemDatabase
+import com.example.todo.data.network.NetworkConnection
 import com.example.todo.di.activity.MainActivityScope
 import com.example.todo.di.app.AppScope
 import dagger.Module
@@ -53,6 +58,28 @@ interface NetworkModule {
                     level = LogLevel.ALL
                 }
             }
+        }
+
+        @AppScope
+        @Provides
+        fun provideDataBase(context: Context): TodoItemDatabase {
+            return Room.databaseBuilder(
+                context.applicationContext,
+                TodoItemDatabase::class.java,
+                "todoItems.db"
+            )
+                .build()
+        }
+
+        @Provides
+        fun provideToDoDao(db: TodoItemDatabase): TodoItemDao {
+            return db.dao
+        }
+
+        @Provides
+        @AppScope
+        fun provideNetworkConnection(context: Context) : NetworkConnection {
+            return NetworkConnection(context)
         }
     }
 }

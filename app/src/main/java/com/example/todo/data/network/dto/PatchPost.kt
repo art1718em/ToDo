@@ -4,12 +4,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Response(
-    @SerialName("revision")
-    val revision: Int,
+data class PatchPost(
     @SerialName("status")
     val status: String,
     @SerialName("list")
     val todoItemDtos: List<TodoItemDto>,
 )
-

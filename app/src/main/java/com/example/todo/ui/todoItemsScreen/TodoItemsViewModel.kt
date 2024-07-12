@@ -3,12 +3,10 @@ package com.example.todo.ui.todoItemsScreen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
-import com.example.todo.data.repository.TodoItemsRepository
 import com.example.todo.di.todoItemsScreen.TodoItemsFragmentScope
+import com.example.todo.domain.interactor.TodoItemsInteractor
 import com.example.todo.domain.model.TodoItem
 import com.example.todo.navigation.NavManager
-import com.example.todo.navigation.Screen
 import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenState
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenUiEffects
@@ -23,12 +21,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @TodoItemsFragmentScope
 class TodoItemsViewModel @Inject constructor(
-    private val todoItemsRepository: TodoItemsRepository,
+    private val interactor: TodoItemsInteractor,
     private val navManager: NavManager,
 ) : ViewModel() {
 
@@ -50,46 +48,59 @@ class TodoItemsViewModel @Inject constructor(
 
     private fun collectTodoItems(){
         loadingTodoItemsJob?.cancel()
-        loadingTodoItemsJob = todoItemsRepository.resultTodoItems.collectIn(viewModelScope){ resultOfTodoItems ->
+        loadingTodoItemsJob = interactor.todoItems.collectIn(viewModelScope){ resultOfTodoItems ->
             val currentTodoItemsScreenUiState = todoItemsScreenUiState.value
             val isHidden = when(currentTodoItemsScreenUiState){
                 is TodoItemsScreenState.Success -> currentTodoItemsScreenUiState.isHiddenCompletedItems
                 else -> false
             }
-            if (resultOfTodoItems == null) {
-                _todoItemsScreenUiState.value = TodoItemsScreenState.Loading
-            } else if (resultOfTodoItems.isSuccess){
-                todoItems = resultOfTodoItems.getOrThrow().map { it.toTodoItemsUiModel() }
-                _todoItemsScreenUiState.value = TodoItemsScreenState.Success(
-                    todoItems = if (isHidden) {
-                        todoItems.filter { !it.isCompleted }
-                    } else{
-                        todoItems
-                    },
-                    countOfCompletedItems = todoItems.countCompletedItems(),
-                    isHiddenCompletedItems = isHidden,
-                )
-            } else {
-                _todoItemsScreenUiState.value = TodoItemsScreenState.Error(
-                    message = resultOfTodoItems.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE
-                )
-            }
+            todoItems = resultOfTodoItems.map { it.toTodoItemsUiModel() }
+            _todoItemsScreenUiState.value = TodoItemsScreenState.Success(
+                todoItems = if (isHidden) {
+                    todoItems.filter { !it.isCompleted }
+                } else{
+                    todoItems
+                },
+                countOfCompletedItems = todoItems.countCompletedItems(),
+                isHiddenCompletedItems = isHidden,
+            )
+
+//            if (resultOfTodoItems == null) {
+//                _todoItemsScreenUiState.value = TodoItemsScreenState.Loading
+//            } else if (resultOfTodoItems.isSuccess){
+//                todoItems = resultOfTodoItems.map { it.toTodoItemsUiModel() }
+//                _todoItemsScreenUiState.value = TodoItemsScreenState.Success(
+//                    todoItems = if (isHidden) {
+//                        todoItems.filter { !it.isCompleted }
+//                    } else{
+//                        todoItems
+//                    },
+//                    countOfCompletedItems = todoItems.countCompletedItems(),
+//                    isHiddenCompletedItems = isHidden,
+//                )
+//            } else {
+//                _todoItemsScreenUiState.value = TodoItemsScreenState.Error(
+//                    message = resultOfTodoItems.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE
+//                )
+//            }
         }
     }
 
     fun loadTodoItems(){
         Log.d("mytag", "загрузка данных")
         viewModelScope.launch {
-            todoItemsRepository.getTodoItems()
+            interactor.getTodoItems()
         }
     }
 
     fun updateIsCompeted(id: String, isChecked: Boolean){
         updatingIsCompletedTodoItemJob?.cancel()
+        val currentDateMillis = Calendar.getInstance().timeInMillis
         updatingIsCompletedTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            val result = todoItemsRepository.updateChecked(
+            val result = interactor.updateCompleted(
                 id =  id,
                 isCompleted = isChecked,
+                dateOfChange = currentDateMillis,
             )
             if (result.isFailure){
                 _effectFlow.emit(
@@ -115,7 +126,7 @@ class TodoItemsViewModel @Inject constructor(
 
     fun deleteTodoItem(id: String){
         viewModelScope.launch(Dispatchers.IO) {
-            val result = todoItemsRepository.deleteItem(id)
+            val result = interactor.deleteTodoItem(id)
             if (result.isFailure){
                 _todoItemsScreenUiState.value = TodoItemsScreenState.Error(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE)
             }
