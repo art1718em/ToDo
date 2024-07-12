@@ -3,6 +3,18 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("kotlin-kapt")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("telegram-reporter")
+}
+
+val maxApkSizeValue = 30
+val validationEnabledValue = true
+val analysisEnabledValue = true
+tgReporter {
+    token.set(providers.environmentVariable("TELEGRAM_BOT_TOKEN"))
+    chatId.set(providers.environmentVariable("TELEGRAM_BOT_ID"))
+    maxApkSize.set(maxApkSizeValue)
+    validationEnabled.set(validationEnabledValue)
+    analysisEnabled.set(analysisEnabledValue)
 }
 
 android {
