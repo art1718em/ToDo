@@ -17,6 +17,8 @@ tgReporter {
     analysisEnabled.set(analysisEnabledValue)
 }
 
+
+
 android {
     namespace = "com.example.todo"
     compileSdk = 34
@@ -92,8 +94,10 @@ dependencies {
 
     // Room
     implementation(libs.androidx.room.ktx)
-    //noinspection KaptUsageInsteadOfKsp
     kapt(libs.androidx.room.compiler)
+
+    //workManager
+    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.core.ktx)

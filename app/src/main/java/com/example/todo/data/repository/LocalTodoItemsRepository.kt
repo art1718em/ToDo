@@ -7,6 +7,7 @@ import com.example.todo.domain.model.TodoItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -17,7 +18,7 @@ class LocalTodoItemsRepository @Inject constructor(
 ) {
 
     suspend fun getTodoItems(): List<TodoItem>{
-        return withContext(Dispatchers.IO){
+         return withContext(Dispatchers.IO){
             dao.getListTodoItems().map {item -> mapper.mapEntityToModel(item) }
         }
     }
@@ -27,7 +28,6 @@ class LocalTodoItemsRepository @Inject constructor(
             dao.upsertTodoItem(
                 mapper.mapModelToEntity(todoItem)
             )
-            getTodoItems()
         }
     }
 
@@ -36,7 +36,6 @@ class LocalTodoItemsRepository @Inject constructor(
             dao.upsertList(
                 todoItems.map { mapper.mapModelToEntity(it) }
             )
-            getTodoItems()
         }
     }
 
@@ -49,7 +48,6 @@ class LocalTodoItemsRepository @Inject constructor(
     suspend fun deleteItem(id: String){
         withContext(Dispatchers.IO){
             dao.deleteTodoItem(id)
-            getTodoItems()
         }
     }
 }

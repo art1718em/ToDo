@@ -39,26 +39,6 @@ class NetworkTodoItemsRepository @Inject constructor(
         }
     }
 
-//    suspend fun updateChecked(i): Result<Unit>{
-//        val newItem = todoItems
-//            .firstOrNull { it.id == id }
-//            ?.copy(isCompleted = isCompleted)
-//            ?: return Result.failure(Exception(NOT_FOUND_ITEM_MESSAGE))
-//
-//        return withContext(Dispatchers.IO){
-//             safeTry {
-//                val revision = todoItemApi.getRevision()
-//                 todoItemApi.updateTodo(mapper.mapModelToPost(newItem), revision.toString())
-//
-//                todoItems = todoItems.map {
-//                    if (it.id == id) it.copy(isCompleted = isCompleted) else it
-//                }
-//                _resultTodoItems.value = Result.success(todoItems)
-//                Result.success(Unit)
-//            }
-//        }
-//    }
-
     suspend fun updateTodoItem(item: TodoItem): Result<Unit>{
         return withContext(Dispatchers.IO) {
              safeTry {
@@ -68,15 +48,6 @@ class NetworkTodoItemsRepository @Inject constructor(
             }
         }
     }
-
-//    fun getItem(todoId: String): Result<TodoItem> {
-//        return safeTry{
-//            val item = todoItems.find { it.id == todoId }
-//            item?.let {
-//                Result.success(item)
-//            }?: throw Exception(NOT_FOUND_ITEM_MESSAGE)
-//        }
-//    }
 
     suspend fun deleteItem(id: String): Result<Unit>{
         return withContext(Dispatchers.IO){

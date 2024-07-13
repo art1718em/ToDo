@@ -5,8 +5,7 @@ import android.util.Log
 import androidx.room.Room
 import com.example.todo.data.local.TodoItemDao
 import com.example.todo.data.local.TodoItemDatabase
-import com.example.todo.data.network.NetworkConnection
-import com.example.todo.di.activity.MainActivityScope
+import com.example.todo.data.network.InternetConnection
 import com.example.todo.di.app.AppScope
 import dagger.Module
 import dagger.Provides
@@ -21,7 +20,6 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import javax.inject.Singleton
 
 @Module
 interface NetworkModule {
@@ -78,8 +76,8 @@ interface NetworkModule {
 
         @Provides
         @AppScope
-        fun provideNetworkConnection(context: Context) : NetworkConnection {
-            return NetworkConnection(context)
+        fun provideNetworkConnection(context: Context) : InternetConnection {
+            return InternetConnection(context)
         }
     }
 }

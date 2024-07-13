@@ -5,15 +5,13 @@ import com.example.todo.MainActivity
 import com.example.todo.R
 import com.example.todo.di.activity.MainActivityScope
 import com.example.todo.ui.todoItemDetailsScreen.TodoItemDetailsFragment
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Provider
 
 @MainActivityScope
-class NavManager @Inject constructor(
+class FragmentNavigation @Inject constructor(
     private val activity: Provider<MainActivity>,
 ) {
 

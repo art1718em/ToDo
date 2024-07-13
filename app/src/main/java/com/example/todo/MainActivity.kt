@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.commit
 import com.example.todo.app.App
+import com.example.todo.data.network.WorkScheduler
 import com.example.todo.di.activity.MainActivityComponent
 import com.example.todo.di.activity.MainActivityModule
 import com.example.todo.di.activity.MainActivityScope
@@ -23,6 +24,8 @@ class MainActivity: FragmentActivity() {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        WorkScheduler.schedulerWork(this)
 
 
         if (savedInstanceState == null) {

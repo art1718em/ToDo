@@ -1,16 +1,19 @@
 package com.example.todo.domain.interactor
 
-import android.util.Log
-import com.example.todo.data.network.NetworkConnection
+import com.example.todo.data.network.InternetConnection
 import com.example.todo.data.repository.LocalTodoItemsRepository
 import com.example.todo.data.repository.NetworkTodoItemsRepository
 import com.example.todo.di.activity.MainActivityScope
 import com.example.todo.domain.model.TodoItem
+import com.example.todo.utils.NO_INTERNET
+import com.example.todo.utils.SYNCHRONIZED_MESSAGE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -19,115 +22,116 @@ import javax.inject.Inject
 class TodoItemsInteractor @Inject constructor(
     private val networkTodoItemsRepository: NetworkTodoItemsRepository,
     private val localTodoItemsRepository: LocalTodoItemsRepository,
-    private val networkConnection: NetworkConnection,
+    private val internetConnection: InternetConnection,
 ) {
 
-    private val _todoItems = MutableStateFlow<List<TodoItem>>(emptyList())
-    val todoItems = _todoItems.asStateFlow()
+    private var todoItems = emptyList<TodoItem>()
+
+    private val _todoItemsResult = MutableStateFlow<Result<List<TodoItem>>?>(null)
+    val todoItemsResult = _todoItemsResult.asStateFlow()
+
+    private val _toastMessage = MutableSharedFlow<String>()
+    val toastMessage = _toastMessage.asSharedFlow()
 
     private var isNetworkAvailable: Boolean = false
-
 
     init {
         collectNetworkState()
     }
 
-
     suspend fun getTodoItems() {
         withContext(Dispatchers.IO) {
-            val todoItemsLocal = localTodoItemsRepository.getTodoItems()
-            Log.d("mytag", "local " + todoItemsLocal.toString())
-            val todoItemsNetwork = networkTodoItemsRepository.getTodoItems()
-            Log.d("mytag", "server " + todoItemsNetwork.toString())
+            _todoItemsResult.value = null
+            var currentTodoItems = localTodoItemsRepository.getTodoItems()
             if (isNetworkAvailable) {
-                val result = if (todoItemsLocal.isNotEmpty()) {
-                    networkTodoItemsRepository.patchTodoItems(todoItemsLocal)
-                } else{
+                val result = if (currentTodoItems.isNotEmpty()) {
+                    networkTodoItemsRepository.patchTodoItems(currentTodoItems)
+                } else {
                     networkTodoItemsRepository.getTodoItems()
                 }
-                if (result.isSuccess){
+                if (result.isSuccess) {
                     val items = result.getOrNull()
-                    if (items != null){
-                        Log.d("mytag", "patch " + items.toString())
+                    if (items != null) {
                         localTodoItemsRepository.upsertList(items)
-                        _todoItems.value = items
+                        currentTodoItems = items
+                        _toastMessage.emit(SYNCHRONIZED_MESSAGE)
                     }
                 }
-                else{
-                    _todoItems.value = todoItemsLocal
-                }
             } else {
-                _todoItems.value = todoItemsLocal
+                _toastMessage.emit(NO_INTERNET)
             }
+            todoItems = currentTodoItems
+            _todoItemsResult.value = Result.success(currentTodoItems)
         }
     }
 
-    suspend fun updateTodoItem(todoItem: TodoItem): Result<Unit> {
+    suspend fun updateTodoItem(todoItem: TodoItem) {
         withContext(Dispatchers.IO) {
             localTodoItemsRepository.upsertTodoItem(todoItem)
-            if (isNetworkAvailable){
+            if (isNetworkAvailable) {
                 networkTodoItemsRepository.updateTodoItem(todoItem)
             }
-            _todoItems.value = todoItems.value.map {
+            todoItems = todoItems.map {
                 if (it.id == todoItem.id){
                     todoItem
                 } else{
                     it
                 }
             }
+            _todoItemsResult.value = Result.success(todoItems)
         }
-        return Result.success(Unit)
     }
 
-    suspend fun addTodoItem(todoItem: TodoItem): Result<Unit>{
-        withContext(Dispatchers.IO){
+    suspend fun addTodoItem(todoItem: TodoItem) {
+        withContext(Dispatchers.IO) {
             localTodoItemsRepository.upsertTodoItem(todoItem)
-            if (isNetworkAvailable){
+            if (isNetworkAvailable) {
                 networkTodoItemsRepository.addTodoItem(todoItem)
             }
-            _todoItems.value = todoItems.value + todoItem
+            todoItems = todoItems + todoItem
+            _todoItemsResult.value = Result.success(todoItems)
         }
-        return Result.success(Unit)
     }
 
-    suspend fun deleteTodoItem(id: String): Result<Unit> {
+    suspend fun deleteTodoItem(id: String) {
         withContext(Dispatchers.IO) {
             localTodoItemsRepository.deleteItem(id)
-            if (isNetworkAvailable){
+            if (isNetworkAvailable) {
                 networkTodoItemsRepository.deleteItem(id)
             }
-            _todoItems.value = todoItems.value.filterNot { it.id == id }
+            todoItems = todoItems.filterNot { it.id == id }
         }
-        return Result.success(Unit)
+        _todoItemsResult.value = Result.success(todoItems)
     }
 
-    suspend fun updateCompleted(id: String, isCompleted: Boolean, dateOfChange: Long): Result<Unit>{
-         withContext(Dispatchers.IO) {
+    suspend fun updateCompleted(
+        id: String,
+        isCompleted: Boolean,
+        dateOfChange: Long
+    ) {
+        withContext(Dispatchers.IO) {
 
-            val newItem = todoItems.value
+            val newItem = todoItems
                 .firstOrNull { it.id == id }
                 ?.copy(
                     isCompleted = isCompleted,
                     dateOfChange = dateOfChange,
                 )
                 ?: return@withContext
-             localTodoItemsRepository.upsertTodoItem(newItem)
-            if (isNetworkAvailable){
+
+            localTodoItemsRepository.upsertTodoItem(newItem)
+            if (isNetworkAvailable) {
                 networkTodoItemsRepository.updateTodoItem(newItem)
             }
-            _todoItems.value = todoItems.value.map {
-                if (it.id == id){
-                    it.copy(
-                        isCompleted = isCompleted,
-                        dateOfChange = dateOfChange,
-                        )
-                } else {
+            todoItems = todoItems.map {
+                if (it.id == newItem.id){
+                    newItem
+                } else{
                     it
                 }
             }
-
+            _todoItemsResult.value = Result.success(todoItems)
         }
-        return Result.success(Unit)
     }
 
     suspend fun getItem(id: String): Result<TodoItem> {
@@ -138,10 +142,12 @@ class TodoItemsInteractor @Inject constructor(
 
     private fun collectNetworkState() {
         CoroutineScope(Dispatchers.IO).launch {
-            networkConnection.observeNetworkState().collect { networkState ->
+            internetConnection.observeNetworkState().collectLatest { networkState ->
                 isNetworkAvailable = networkState
-                if (isNetworkAvailable){
+                if (isNetworkAvailable) {
                     getTodoItems()
+                } else {
+                    _toastMessage.emit(NO_INTERNET)
                 }
             }
         }

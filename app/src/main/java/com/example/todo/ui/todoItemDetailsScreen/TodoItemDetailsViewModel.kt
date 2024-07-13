@@ -1,14 +1,12 @@
 package com.example.todo.ui.todoItemDetailsScreen
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.todo.data.repository.NetworkTodoItemsRepository
 import com.example.todo.di.todoItemDetailsScreen.TodoItemDetailsFragmentScope
 import com.example.todo.domain.interactor.TodoItemsInteractor
 import com.example.todo.domain.model.Importance
 import com.example.todo.domain.model.TodoItem
-import com.example.todo.navigation.NavManager
+import com.example.todo.navigation.FragmentNavigation
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenState
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenUiEffects
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsUiModel
@@ -28,7 +26,7 @@ import javax.inject.Inject
 @TodoItemDetailsFragmentScope
 class TodoItemDetailsViewModel @Inject constructor(
     private val interactor: TodoItemsInteractor,
-    private val navManager: NavManager,
+    private val fragmentNavigation: FragmentNavigation,
 ) : ViewModel() {
 
     private val _todoItemDetailsScreenState =
@@ -52,7 +50,7 @@ class TodoItemDetailsViewModel @Inject constructor(
 
     fun loadTodoItem() {
         loadingTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            navManager.todoItemId.collect{id ->
+            fragmentNavigation.todoItemId.collect{ id ->
                 if (id == null) {
                     _todoItemDetailsScreenState.value =
                         TodoItemDetailsScreenState.Success(TodoItemDetailsUiModel())
@@ -130,18 +128,13 @@ class TodoItemDetailsViewModel @Inject constructor(
                     dateOfChange = currentDateMillis,
                 )
 
-                val result = if (todoItem.value.id.isEmpty()){
+                if (todoItem.value.id.isEmpty()){
                     interactor.addTodoItem(item)
                 } else {
                     interactor.updateTodoItem(item)
                 }
 
-                if (result.isSuccess){
-                    navigateToItems()
-                } else {
-                    _effectFlow.emit(TodoItemDetailsScreenUiEffects.ShowErrorMessage(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE))
-                }
-
+                navigateToItems()
             }
         }
     }
@@ -149,18 +142,14 @@ class TodoItemDetailsViewModel @Inject constructor(
 
     fun navigateToItems() {
         loadingTodoItemJob?.cancel()
-        navManager.navigateBack()
+        fragmentNavigation.navigateBack()
     }
 
     fun deleteTodoItem() {
         deletionTodoItemJob?.cancel()
         deletionTodoItemJob = viewModelScope.launch {
-            val result = interactor.deleteTodoItem(todoItem.value.id)
-            if (result.isSuccess){
-                navigateToItems()
-            } else {
-                _effectFlow.emit(TodoItemDetailsScreenUiEffects.ShowErrorMessage(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE))
-            }
+            interactor.deleteTodoItem(todoItem.value.id)
+            navigateToItems()
         }
     }
 

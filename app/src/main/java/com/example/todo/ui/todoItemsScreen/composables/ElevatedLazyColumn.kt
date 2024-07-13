@@ -31,6 +31,7 @@ fun ElevatedLazyColumn(
     onDeleteItem: (String) -> Unit,
     onCheckedChange: (String, Boolean) -> Unit,
     onNavigateToDetails: (String?) -> Unit,
+    onRefresh: () -> Unit,
     state: LazyListState,
 ) {
     LazyColumn(
@@ -76,6 +77,15 @@ fun ElevatedLazyColumn(
                         color = MaterialTheme.colorScheme.onTertiary,
                     )
                 }
+                TextButton(
+                    onClick = { onRefresh()}
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.update),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onTertiary,
+                    )
+                }
             }
         }
     }
@@ -98,6 +108,7 @@ fun ElevatedLazyColumnPreview() {
             onDeleteItem = { },
             onCheckedChange = { _, _ -> },
             onNavigateToDetails = { },
+            onRefresh = { },
             state = rememberLazyListState(),
         )
     }
