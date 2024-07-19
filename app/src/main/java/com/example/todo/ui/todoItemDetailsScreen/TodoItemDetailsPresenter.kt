@@ -1,8 +1,10 @@
 package com.example.todo.ui.todoItemDetailsScreen
 
+import com.example.todo.di.todoItemDetailsScreen.TodoItemDetailsFragmentScope
 import com.example.todo.domain.model.Importance
 import javax.inject.Inject
 
+@TodoItemDetailsFragmentScope
 class TodoItemDetailsPresenter @Inject constructor(
     private val todoItemDetailsViewModel: TodoItemDetailsViewModel,
 ) {

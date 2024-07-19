@@ -3,10 +3,10 @@ package com.example.todo.ui.todoItemsScreen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
-import com.example.todo.data.repository.TodoItemsRepository
+import com.example.todo.di.todoItemsScreen.TodoItemsFragmentScope
+import com.example.todo.domain.interactor.TodoItemsInteractor
 import com.example.todo.domain.model.TodoItem
-import com.example.todo.navigation.Screen
+import com.example.todo.navigation.FragmentNavigation
 import com.example.todo.ui.todoItemsScreen.state.TodoItemUiModel
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenState
 import com.example.todo.ui.todoItemsScreen.state.TodoItemsScreenUiEffects
@@ -21,13 +21,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@TodoItemsFragmentScope
 class TodoItemsViewModel @Inject constructor(
-    private val todoItemsRepository: TodoItemsRepository,
-    private val navController: NavController,
+    private val interactor: TodoItemsInteractor,
+    private val fragmentNavigation: FragmentNavigation,
 ) : ViewModel() {
 
     private var todoItems = listOf<TodoItemUiModel>()
@@ -44,11 +44,20 @@ class TodoItemsViewModel @Inject constructor(
     init{
         loadTodoItems()
         collectTodoItems()
+        collectMessages()
+    }
+
+    private fun collectMessages(){
+        viewModelScope.launch(Dispatchers.Default) {
+            interactor.toastMessage.collect{
+                _effectFlow.emit(TodoItemsScreenUiEffects.ShowErrorMessage(it))
+            }
+        }
     }
 
     private fun collectTodoItems(){
         loadingTodoItemsJob?.cancel()
-        loadingTodoItemsJob = todoItemsRepository.resultTodoItems.collectIn(viewModelScope){ resultOfTodoItems ->
+        loadingTodoItemsJob = interactor.todoItemsResult.collectIn(viewModelScope){ resultOfTodoItems ->
             val currentTodoItemsScreenUiState = todoItemsScreenUiState.value
             val isHidden = when(currentTodoItemsScreenUiState){
                 is TodoItemsScreenState.Success -> currentTodoItemsScreenUiState.isHiddenCompletedItems
@@ -57,7 +66,7 @@ class TodoItemsViewModel @Inject constructor(
             if (resultOfTodoItems == null) {
                 _todoItemsScreenUiState.value = TodoItemsScreenState.Loading
             } else if (resultOfTodoItems.isSuccess){
-                todoItems = resultOfTodoItems.getOrThrow().map { it.toTodoItemsUiModel() }
+                todoItems = resultOfTodoItems.getOrDefault(emptyList()).map { it.toTodoItemsUiModel() }
                 _todoItemsScreenUiState.value = TodoItemsScreenState.Success(
                     todoItems = if (isHidden) {
                         todoItems.filter { !it.isCompleted }
@@ -76,26 +85,21 @@ class TodoItemsViewModel @Inject constructor(
     }
 
     fun loadTodoItems(){
-        Log.d("mytag", "загрузка данных")
         viewModelScope.launch {
-            todoItemsRepository.getTodoItems()
+            Log.d("mytag", "vm")
+            interactor.getTodoItems()
         }
     }
 
     fun updateIsCompeted(id: String, isChecked: Boolean){
         updatingIsCompletedTodoItemJob?.cancel()
+        val currentDateMillis = Calendar.getInstance().timeInMillis
         updatingIsCompletedTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            val result = todoItemsRepository.updateChecked(
+            interactor.updateCompleted(
                 id =  id,
                 isCompleted = isChecked,
+                dateOfChange = currentDateMillis,
             )
-            if (result.isFailure){
-                _effectFlow.emit(
-                    TodoItemsScreenUiEffects.ShowErrorMessage(
-                        result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE
-                    )
-                )
-            }
         }
     }
 
@@ -113,15 +117,12 @@ class TodoItemsViewModel @Inject constructor(
 
     fun deleteTodoItem(id: String){
         viewModelScope.launch(Dispatchers.IO) {
-            val result = todoItemsRepository.deleteItem(id)
-            if (result.isFailure){
-                _todoItemsScreenUiState.value = TodoItemsScreenState.Error(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE)
-            }
+            interactor.deleteTodoItem(id)
         }
     }
 
     fun navigateToTodoItemDetails(idOfTodoItem: String?){
-        navController.navigate("${Screen.TodoItemDetailsScreen.route}/${idOfTodoItem}")
+        fragmentNavigation.navigateToSecondFragment(idOfTodoItem)
     }
 
 }

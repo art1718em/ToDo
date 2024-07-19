@@ -1,11 +1,12 @@
 package com.example.todo.ui.todoItemsScreen
 
 import androidx.compose.runtime.Stable
+import com.example.todo.di.todoItemsScreen.TodoItemsFragmentScope
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Stable
-@Singleton
+@TodoItemsFragmentScope
 class TodoItemsPresenter @Inject constructor(
     private val todoItemsViewModel: TodoItemsViewModel,
 ){

@@ -12,3 +12,4 @@ data class Response(
     @SerialName("list")
     val todoItemDtos: List<TodoItemDto>,
 )
+

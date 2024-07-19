@@ -1,6 +1,7 @@
 package com.example.todo.data.network
 
 import android.util.Log
+import com.example.todo.data.network.dto.PatchPost
 import com.example.todo.data.network.dto.TodoItemPost
 import com.example.todo.data.network.dto.Response
 import com.example.todo.data.network.dto.TodoItemDto
@@ -9,6 +10,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -67,4 +69,15 @@ class TodoItemApi @Inject constructor(
         val response : TodoItemPost = result.body()
         return response.status
     }
+
+    suspend fun patchTodo(patchPost: PatchPost, revision: Int): List<TodoItemDto> {
+        val result = client.patch(HttpRoutes.LIST) {
+            header("X-Last-Known-Revision", revision)
+            contentType(ContentType.Application.Json)
+            setBody(patchPost)
+        }
+        val response: Response = result.body()
+        return response.todoItemDtos
+    }
+
 }
