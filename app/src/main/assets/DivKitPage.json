@@ -1,0 +1,167 @@
+{
+  "card": {
+    "log_id": "todo_card",
+    "variables": [
+      {
+        "name": "likes.count",
+        "type": "integer",
+        "value": 7
+      }
+    ],
+    "states": [
+      {
+        "state_id": 0,
+        "div": {
+          "type": "container",
+          "margins": {
+            "left": 8,
+            "right": 8,
+            "top": 8,
+            "bottom": 8
+          },
+          "content_alignment_horizontal": "center",
+          "items": [
+            {
+              "type": "image",
+              "image_url": "https://image.winudf.com/v2/image1/Y29tLmRvdG8udG9kb2FwcF9pY29uXzE2ODA0ODgxMjlfMDI2/icon.png?w=0&fakeurl=1",
+              "width":{
+                "type": "fixed",
+                "value": 160,
+                "unit": "dp"
+              }
+            },
+            {
+              "type": "container",
+              "orientation": "vertical",
+              "items": [
+                {
+                  "type": "text",
+                  "text": "Приложение ToDo",
+                  "font_size": 20,
+                  "text_alignment_horizontal": "center"
+                },
+                {
+                  "type": "container",
+                  "orientation": "horizontal",
+                  "margins": {
+                    "top": 16
+                  },
+                  "content_alignment_vertical": "center",
+                  "items": [
+                    {
+                      "type": "text",
+                      "text": "Поддержите разработчиков лайком",
+                      "font_size": 14
+                    },
+                    {
+                      "type": "container",
+                      "orientation": "horizontal",
+                      "width":{
+                        "type": "wrap_content"
+                      },
+                      "items": [
+                        {
+                          "type": "text",
+                          "text": "@{likes.count}",
+                          "font_size": 14,
+                          "margins": {
+                            "end": 8
+                          },
+                          "width":{
+                            "type": "wrap_content"
+                          }
+                        },
+                        {
+                          "type": "state",
+                          "id": "state_likes",
+                          "width":{
+                            "type": "wrap_content"
+                          },
+
+                          "states": [
+                            {
+                              "state_id": "disliked",
+                              "div":{
+                                "type": "image",
+                                "image_url": "https://icon-library.com/images/like-icon-png/like-icon-png-0.jpg",
+                                "width":{
+                                  "type": "fixed",
+                                  "value": 20,
+                                  "unit": "dp"
+                                },
+                                "actions": [
+                                  {
+                                    "log_id": "add_like",
+                                    "url": "div-action://set_variable?name=likes.count&value=@{likes.count + 1}"
+                                  },
+                                  {
+                                    "log_id": "set_liked",
+                                    "url": "div-action://set_state?state_id=0/state_likes/liked"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "state_id": "liked",
+                              "div":{
+                                "type": "image",
+                                "image_url": "https://icon-library.com/images/like-icon-png/like-icon-png-0.jpg",
+                                "tint_color": "#0000FF",
+                                "width":{
+                                  "type": "fixed",
+                                  "value": 20,
+                                  "unit": "dp"
+                                },
+                                "actions": [
+                                  {
+                                    "log_id": "remove_like",
+                                    "url": "div-action://set_variable?name=likes.count&value=@{likes.count - 1}"
+                                  },
+                                  {
+                                    "log_id": "set_disliked",
+                                    "url": "div-action://set_state?state_id=0/state_likes/disliked"
+                                  }
+                                ]
+
+                              }
+                            }
+
+                          ]
+                        }
+
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "Данное приложение создано в итоге выполнения нескольких домашних заданий в ШМР Android. С его помощью были отточены многочисленные навыки по созданию мобильных приложений, а также получены новые знания.",
+                  "text_alignment_horizontal": "center",
+                  "margins": {
+                    "top": 8
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Выйти из экрана \"О приложении\"",
+                  "underline": "single",
+                  "font_size": 16,
+                  "text_alignment_horizontal": "center",
+                  "margins": {
+                    "top": 8
+                  },
+                  "actions": [
+                    {
+                      "log_id": "navigate_to_native",
+                      "url": "navigate-action://navigate_to_native"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 package com.example.todo.ui.design
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -14,12 +15,13 @@ import com.example.todo.ui.design.theme.ToDoTheme
 import com.example.todo.ui.design.theme.blue
 
 @Composable
-fun ProgressBar(){
+fun ProgressBar() {
     Box(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center,
-    ){
+    ) {
         CircularProgressIndicator(
             modifier = Modifier
                 .size(48.dp),
@@ -30,7 +32,7 @@ fun ProgressBar(){
 
 @Preview(showBackground = true)
 @Composable
-fun ProgressBarPreview(){
+fun ProgressBarPreview() {
     ToDoTheme {
         ProgressBar()
     }

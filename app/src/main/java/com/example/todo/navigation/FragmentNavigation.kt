@@ -4,7 +4,9 @@ import androidx.fragment.app.commit
 import com.example.todo.MainActivity
 import com.example.todo.R
 import com.example.todo.di.activity.MainActivityScope
+import com.example.todo.ui.appInformationScreen.AppInformationFragment
 import com.example.todo.ui.todoItemDetailsScreen.TodoItemDetailsFragment
+import com.example.todo.ui.userThemeChoiceScreen.UserThemeChoiceFragment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
@@ -21,10 +23,24 @@ class FragmentNavigation @Inject constructor(
     private val fragmentManager
         get() = activity.get().supportFragmentManager.takeIf { it.isDestroyed.not() }
 
-    fun navigateToSecondFragment(id: String?) {
+    fun navigateToTodoItemDetailsFragment(id: String?) {
         _todoItemId.value = id
         fragmentManager?.commit {
             replace(R.id.fragment_container, TodoItemDetailsFragment())
+            addToBackStack(null)
+        }
+    }
+
+    fun navigateToUserThemeChoiceFragment() {
+        fragmentManager?.commit {
+            replace(R.id.fragment_container, UserThemeChoiceFragment())
+            addToBackStack(null)
+        }
+    }
+
+    fun navigateAppInformation() {
+        fragmentManager?.commit {
+            replace(R.id.fragment_container, AppInformationFragment())
             addToBackStack(null)
         }
     }

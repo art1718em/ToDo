@@ -29,55 +29,55 @@ private val DarkColorScheme = darkColorScheme(
 
 val ColorScheme.elevated: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_elevated else md_theme_light_elevated
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_elevated else md_theme_light_elevated
 
 val ColorScheme.blue: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_blue else md_theme_light_blue
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_blue else md_theme_light_blue
 
 val ColorScheme.red: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_red else md_theme_light_red
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_red else md_theme_light_red
 
 val ColorScheme.green: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_green else md_theme_light_green
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_green else md_theme_light_green
 
 val ColorScheme.gray: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_gray else md_theme_light_gray
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_gray else md_theme_light_gray
 
 val ColorScheme.grayLight: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_gray_light else md_theme_light_gray_light
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_gray_light else md_theme_light_gray_light
 
 val ColorScheme.white: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_white else md_theme_light_white
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_white else md_theme_light_white
 
 val ColorScheme.overlay: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_overlay else md_theme_light_overlay
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_overlay else md_theme_light_overlay
 
 val ColorScheme.disable: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_onDisable else md_theme_light_onDisable
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_onDisable else md_theme_light_onDisable
 
 val ColorScheme.pink: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_pink else md_theme_light_pink
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_pink else md_theme_light_pink
 
 val ColorScheme.switchTrackChecked: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_switch_track_checked else md_theme_light_switch_track_checked
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_switch_track_checked else md_theme_light_switch_track_checked
 
 val ColorScheme.switchTrackUnchecked: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_switch_track_unchecked else md_theme_light_switch_track_unchecked
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_switch_track_unchecked else md_theme_light_switch_track_unchecked
 
 val ColorScheme.switchThumbUnchecked: Color
     @Composable
-    get() = if (isSystemInDarkTheme()) md_theme_dark_switch_thumb_unchecked else md_theme_light_switch_thumb_unchecked
+    get() = if (ToDoThemeProvider.current.darkTheme) md_theme_dark_switch_thumb_unchecked else md_theme_light_switch_thumb_unchecked
 
 private val LightColorScheme = lightColorScheme(
     outline = md_theme_light_outline,
@@ -113,6 +113,8 @@ fun ToDoTheme(
         }
     }
 
+    ToDoThemeProvider.current = ToDoThemeColors(darkTheme)
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
@@ -122,7 +124,7 @@ fun ToDoTheme(
 
 @Preview
 @Composable
-fun LightColors(){
+fun LightColors() {
     val lightColors = listOf(
         "Support [Light] Separator" to MaterialTheme.colorScheme.outline,
     )

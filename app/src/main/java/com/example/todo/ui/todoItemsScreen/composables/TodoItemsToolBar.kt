@@ -1,9 +1,12 @@
 package com.example.todo.ui.todoItemsScreen.composables
 
-import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +37,8 @@ fun TodoItemsToolBar(
     scrollState: LazyListState,
     scrollBehavior: TopAppBarScrollBehavior,
     onChangeHiddenCompletedItems: (Boolean) -> Unit,
+    onClickSettings: () -> Unit,
+    onClickAppInformation: () -> Unit,
 ) {
 
     val shadowPadding by remember {
@@ -81,6 +86,30 @@ fun TodoItemsToolBar(
                     tint = MaterialTheme.colorScheme.blue,
                 )
             }
+
+            IconButton(
+                modifier = Modifier.padding(0.dp),
+                onClick = onClickSettings,
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(24.dp),
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = stringResource(id = R.string.icon_settings),
+                )
+            }
+
+            IconButton(
+                modifier = Modifier.padding(0.dp),
+                onClick = onClickAppInformation,
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(24.dp),
+                    imageVector = Icons.Filled.Info,
+                    contentDescription = stringResource(id = R.string.icon_information),
+                )
+            }
         }
     )
 }
@@ -88,14 +117,16 @@ fun TodoItemsToolBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
-fun TodoItemsToolBarPreview(){
+fun TodoItemsToolBarPreview() {
     ToDoTheme {
         TodoItemsToolBar(
             countOfCompletedItems = 3,
             isHiddenCompletedItems = false,
             scrollState = rememberLazyListState(),
             scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
-            onChangeHiddenCompletedItems = {  },
+            onChangeHiddenCompletedItems = { },
+            onClickSettings = { },
+            onClickAppInformation = { },
         )
     }
 }

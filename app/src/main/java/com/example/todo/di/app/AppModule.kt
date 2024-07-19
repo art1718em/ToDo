@@ -1,4 +1,4 @@
-package com.example.todo.di.network
+package com.example.todo.di.app
 
 import android.content.Context
 import android.util.Log
@@ -6,7 +6,8 @@ import androidx.room.Room
 import com.example.todo.data.local.TodoItemDao
 import com.example.todo.data.local.TodoItemDatabase
 import com.example.todo.data.network.InternetConnection
-import com.example.todo.di.app.AppScope
+import com.example.todo.data.preferences.PreferencesManager
+import com.example.todo.data.preferences.dataStore
 import dagger.Module
 import dagger.Provides
 import io.ktor.client.HttpClient
@@ -22,14 +23,14 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 @Module
-interface NetworkModule {
+interface AppModule {
 
-    companion object{
+    companion object {
         @Provides
         @AppScope
         fun provideHttpClient(): HttpClient {
-            return HttpClient(Android){
-                install(ContentNegotiation){
+            return HttpClient(Android) {
+                install(ContentNegotiation) {
                     json(
                         Json {
                             prettyPrint = true
@@ -39,7 +40,7 @@ interface NetworkModule {
                     )
                 }
 
-                install(Auth){
+                install(Auth) {
                     bearer {
                         loadTokens {
                             BearerTokens("Isilme", "Isilme")
@@ -76,8 +77,14 @@ interface NetworkModule {
 
         @Provides
         @AppScope
-        fun provideNetworkConnection(context: Context) : InternetConnection {
+        fun provideNetworkConnection(context: Context): InternetConnection {
             return InternetConnection(context)
+        }
+
+        @Provides
+        @AppScope
+        fun providePreferencesManager(context: Context): PreferencesManager {
+            return PreferencesManager(context.dataStore)
         }
     }
 }
