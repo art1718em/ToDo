@@ -2,10 +2,12 @@ package com.example.todo.ui.todoItemDetailsScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.todo.data.preferences.PreferencesManager
 import com.example.todo.di.todoItemDetailsScreen.TodoItemDetailsFragmentScope
 import com.example.todo.domain.interactor.TodoItemsInteractor
 import com.example.todo.domain.model.Importance
 import com.example.todo.domain.model.TodoItem
+import com.example.todo.domain.model.UserThemeChoice
 import com.example.todo.navigation.FragmentNavigation
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenState
 import com.example.todo.ui.todoItemDetailsScreen.state.TodoItemDetailsScreenUiEffects
@@ -26,6 +28,7 @@ import javax.inject.Inject
 @TodoItemDetailsFragmentScope
 class TodoItemDetailsViewModel @Inject constructor(
     private val interactor: TodoItemsInteractor,
+    private val preferencesManager: PreferencesManager,
     private val fragmentNavigation: FragmentNavigation,
 ) : ViewModel() {
 
@@ -43,27 +46,33 @@ class TodoItemDetailsViewModel @Inject constructor(
     private var savingTodoItemJob: Job? = null
     private var deletionTodoItemJob: Job? = null
 
+    private val _userThemeChoice =
+        MutableStateFlow<UserThemeChoice>(UserThemeChoice.SystemThemeChoice)
+    val userThemeChoice = _userThemeChoice.asStateFlow()
 
     init {
         loadTodoItem()
+        collectUserThemeChoice()
     }
 
     fun loadTodoItem() {
         loadingTodoItemJob = viewModelScope.launch(Dispatchers.IO) {
-            fragmentNavigation.todoItemId.collect{ id ->
+            fragmentNavigation.todoItemId.collect { id ->
                 if (id == null) {
                     _todoItemDetailsScreenState.value =
                         TodoItemDetailsScreenState.Success(TodoItemDetailsUiModel())
                     return@collect
                 }
                 val result = interactor.getItem(id)
-                if (result.isSuccess){
+                if (result.isSuccess) {
                     todoItem.value = result.getOrThrow()
                     _todoItemDetailsScreenState.value =
                         TodoItemDetailsScreenState.Success(todoItem.value.toTodoItemDetailsUiModel())
                 } else {
                     _todoItemDetailsScreenState.value =
-                        TodoItemDetailsScreenState.Error(result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE)
+                        TodoItemDetailsScreenState.Error(
+                            result.exceptionOrNull()?.message ?: UNKNOWN_MESSAGE
+                        )
                 }
             }
         }
@@ -71,7 +80,7 @@ class TodoItemDetailsViewModel @Inject constructor(
 
     fun updateText(text: String) {
         val currentTodoItemDetailsScreenState = todoItemDetailsScreenState.value
-        if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success){
+        if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success) {
             _todoItemDetailsScreenState.value = TodoItemDetailsScreenState.Success(
                 currentTodoItemDetailsScreenState.todoItemDetailsUiModel.copy(
                     text = text
@@ -82,7 +91,7 @@ class TodoItemDetailsViewModel @Inject constructor(
 
     fun updateImportance(importance: Importance) {
         val currentTodoItemDetailsScreenState = todoItemDetailsScreenState.value
-        if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success){
+        if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success) {
             _todoItemDetailsScreenState.value = TodoItemDetailsScreenState.Success(
                 currentTodoItemDetailsScreenState.todoItemDetailsUiModel.copy(
                     importance = importance
@@ -93,7 +102,7 @@ class TodoItemDetailsViewModel @Inject constructor(
 
     fun updateDeadline(deadline: Long?) {
         val currentTodoItemDetailsScreenState = todoItemDetailsScreenState.value
-        if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success){
+        if (currentTodoItemDetailsScreenState is TodoItemDetailsScreenState.Success) {
             _todoItemDetailsScreenState.value = TodoItemDetailsScreenState.Success(
                 currentTodoItemDetailsScreenState.todoItemDetailsUiModel.copy(
                     deadline = DateFormatting.toFormattedDate(deadline)
@@ -128,7 +137,7 @@ class TodoItemDetailsViewModel @Inject constructor(
                     dateOfChange = currentDateMillis,
                 )
 
-                if (todoItem.value.id.isEmpty()){
+                if (todoItem.value.id.isEmpty()) {
                     interactor.addTodoItem(item)
                 } else {
                     interactor.updateTodoItem(item)
@@ -150,6 +159,14 @@ class TodoItemDetailsViewModel @Inject constructor(
         deletionTodoItemJob = viewModelScope.launch {
             interactor.deleteTodoItem(todoItem.value.id)
             navigateToItems()
+        }
+    }
+
+    private fun collectUserThemeChoice() {
+        viewModelScope.launch(Dispatchers.Default) {
+            preferencesManager.selectedUserThemeChoice.collect {
+                _userThemeChoice.value = it
+            }
         }
     }
 

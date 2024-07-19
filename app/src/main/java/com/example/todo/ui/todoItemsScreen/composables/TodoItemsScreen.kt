@@ -15,7 +15,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +58,7 @@ fun TodoItemsScreen(
             onNavigateToDetails = presenter::navigateToItemDetails,
             onDeleteItem = presenter::deleteItem,
             onRefresh = presenter::loadTodoItems,
+            onClickSettings = presenter::navigateToUserThemeChoice,
         )
 
         is TodoItemsScreenState.Error -> ErrorScreen(
@@ -79,6 +79,7 @@ fun ListTodoItems(
     onDeleteItem: (String) -> Unit,
     onNavigateToDetails: (String?) -> Unit,
     onRefresh: () -> Unit,
+    onClickSettings: () -> Unit,
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -113,6 +114,7 @@ fun ListTodoItems(
                 isHiddenCompletedItems = isHiddenCompletedItems,
                 onChangeHiddenCompletedItems = onChangeHiddenCompletedItems,
                 scrollState = scrollState,
+                onClickSettings = onClickSettings,
             )
         }
     ) { paddingValues ->
@@ -133,6 +135,28 @@ fun ListTodoItems(
         }
 
 
+    }
+}
+
+@Composable
+private fun ShowUiEffectIfNeeded(
+    todoItemsScreenUiEffects: SharedFlow<TodoItemsScreenUiEffects>,
+) {
+
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = Unit) {
+        todoItemsScreenUiEffects.collect { todoItemsScreenUiEffect ->
+            when (todoItemsScreenUiEffect) {
+                is TodoItemsScreenUiEffects.ShowErrorMessage -> {
+                    Toast.makeText(
+                        context,
+                        todoItemsScreenUiEffect.message,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
+        }
     }
 }
 
@@ -157,6 +181,7 @@ fun ListTodoItemsPreview() {
             onDeleteItem = { },
             onNavigateToDetails = { },
             onRefresh = { },
+            onClickSettings = { },
         )
     }
 }
@@ -184,28 +209,8 @@ fun ListTodoItemsDarkThemePreview() {
             onDeleteItem = { },
             onNavigateToDetails = { },
             onRefresh = { },
+            onClickSettings = { },
         )
     }
 }
 
-@Composable
-private fun ShowUiEffectIfNeeded(
-    todoItemsScreenUiEffects: SharedFlow<TodoItemsScreenUiEffects>,
-) {
-
-    val context = LocalContext.current
-
-    LaunchedEffect(key1 = Unit) {
-        todoItemsScreenUiEffects.collect { todoItemsScreenUiEffect ->
-            when (todoItemsScreenUiEffect) {
-                is TodoItemsScreenUiEffects.ShowErrorMessage -> {
-                    Toast.makeText(
-                        context,
-                        todoItemsScreenUiEffect.message,
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                }
-            }
-        }
-    }
-}

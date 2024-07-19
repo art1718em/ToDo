@@ -17,16 +17,17 @@ class MainActivity: FragmentActivity() {
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        mainActivityComponent = (applicationContext as App).appComponent.mainActivityComponent(
-            MainActivityModule(this)
-        )
+        mainActivityComponent = (applicationContext as App)
+            .appComponent
+            .mainActivityComponent(
+                MainActivityModule(this)
+            )
         mainActivityComponent.inject(this)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         WorkScheduler.schedulerWork(this)
-
 
         if (savedInstanceState == null) {
             supportFragmentManager.commit {

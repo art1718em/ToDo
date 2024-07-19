@@ -99,6 +99,9 @@ dependencies {
     //workManager
     implementation(libs.androidx.work.runtime.ktx)
 
+    //preferences
+    implementation(libs.androidx.datastore.preferences)
+
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

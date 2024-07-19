@@ -13,31 +13,33 @@ class TodoItemDetailsPresenter @Inject constructor(
 
     val todoItemDetailsScreenUiEffects = todoItemDetailsViewModel.effectFlow
 
-    fun loadTodoItem(){
+    val userThemeChoice = todoItemDetailsViewModel.userThemeChoice
+
+    fun loadTodoItem() {
         todoItemDetailsViewModel.loadTodoItem()
     }
 
-    fun updateText(text: String){
+    fun updateText(text: String) {
         todoItemDetailsViewModel.updateText(text)
     }
 
-    fun updateImportance(importance: Importance){
+    fun updateImportance(importance: Importance) {
         todoItemDetailsViewModel.updateImportance(importance)
     }
 
-    fun updateDeadline(deadline: Long?){
+    fun updateDeadline(deadline: Long?) {
         todoItemDetailsViewModel.updateDeadline(deadline)
     }
 
-    fun addItem(){
+    fun addItem() {
         todoItemDetailsViewModel.saveItem()
     }
 
-    fun navigateToItems(){
+    fun navigateToItems() {
         todoItemDetailsViewModel.navigateToItems()
     }
 
-    fun deleteTodoItem(){
+    fun deleteTodoItem() {
         todoItemDetailsViewModel.deleteTodoItem()
     }
 }
