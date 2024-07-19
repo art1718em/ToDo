@@ -59,6 +59,7 @@ fun TodoItemsScreen(
             onDeleteItem = presenter::deleteItem,
             onRefresh = presenter::loadTodoItems,
             onClickSettings = presenter::navigateToUserThemeChoice,
+            onClickAppInformation = presenter::navigateToAppInformation
         )
 
         is TodoItemsScreenState.Error -> ErrorScreen(
@@ -80,6 +81,7 @@ fun ListTodoItems(
     onNavigateToDetails: (String?) -> Unit,
     onRefresh: () -> Unit,
     onClickSettings: () -> Unit,
+    onClickAppInformation: () -> Unit,
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -115,6 +117,7 @@ fun ListTodoItems(
                 onChangeHiddenCompletedItems = onChangeHiddenCompletedItems,
                 scrollState = scrollState,
                 onClickSettings = onClickSettings,
+                onClickAppInformation = onClickAppInformation,
             )
         }
     ) { paddingValues ->
@@ -182,6 +185,7 @@ fun ListTodoItemsPreview() {
             onNavigateToDetails = { },
             onRefresh = { },
             onClickSettings = { },
+            onClickAppInformation = { },
         )
     }
 }
@@ -210,6 +214,7 @@ fun ListTodoItemsDarkThemePreview() {
             onNavigateToDetails = { },
             onRefresh = { },
             onClickSettings = { },
+            onClickAppInformation = { },
         )
     }
 }

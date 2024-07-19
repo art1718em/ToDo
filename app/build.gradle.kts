@@ -55,6 +55,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -62,6 +63,13 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    sourceSets {
+        getByName("main") {
+            assets {
+                srcDirs("src\\main\\assets", "src\\main\\assets")
+            }
         }
     }
 }
@@ -101,6 +109,12 @@ dependencies {
 
     //preferences
     implementation(libs.androidx.datastore.preferences)
+
+    //DivKit
+    implementation(libs.div.core)
+    implementation(libs.div)
+    implementation(libs.div.json)
+    implementation(libs.picasso)
 
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.core.ktx)

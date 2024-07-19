@@ -39,7 +39,7 @@ fun UserThemeChoiceScreen(
             ),
     ) {
 
-        Row(
+         Row(
             modifier = Modifier
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically

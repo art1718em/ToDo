@@ -38,4 +38,8 @@ class TodoItemsPresenter @Inject constructor(
     fun navigateToUserThemeChoice() {
         todoItemsViewModel.navigateToUserThemeChoice()
     }
+
+    fun navigateToAppInformation(){
+        todoItemsViewModel.navigateToAppInformation()
+    }
 }

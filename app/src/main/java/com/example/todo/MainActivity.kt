@@ -8,6 +8,7 @@ import com.example.todo.data.network.WorkScheduler
 import com.example.todo.di.activity.MainActivityComponent
 import com.example.todo.di.activity.MainActivityModule
 import com.example.todo.di.activity.MainActivityScope
+import com.example.todo.ui.appInformationScreen.AssetsReader
 import com.example.todo.ui.todoItemsScreen.TodoItemsFragment
 import javax.inject.Inject
 
@@ -15,6 +16,8 @@ class MainActivity: FragmentActivity() {
 
     lateinit var mainActivityComponent: MainActivityComponent
         private set
+
+    val assetReader = AssetsReader(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         mainActivityComponent = (applicationContext as App)

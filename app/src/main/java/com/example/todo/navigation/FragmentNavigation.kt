@@ -4,6 +4,7 @@ import androidx.fragment.app.commit
 import com.example.todo.MainActivity
 import com.example.todo.R
 import com.example.todo.di.activity.MainActivityScope
+import com.example.todo.ui.appInformationScreen.AppInformationFragment
 import com.example.todo.ui.todoItemDetailsScreen.TodoItemDetailsFragment
 import com.example.todo.ui.userThemeChoiceScreen.UserThemeChoiceFragment
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,13 @@ class FragmentNavigation @Inject constructor(
     fun navigateToUserThemeChoiceFragment() {
         fragmentManager?.commit {
             replace(R.id.fragment_container, UserThemeChoiceFragment())
+            addToBackStack(null)
+        }
+    }
+
+    fun navigateAppInformation() {
+        fragmentManager?.commit {
+            replace(R.id.fragment_container, AppInformationFragment())
             addToBackStack(null)
         }
     }

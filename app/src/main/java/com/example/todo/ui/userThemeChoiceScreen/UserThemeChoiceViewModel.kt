@@ -3,6 +3,7 @@ package com.example.todo.ui.userThemeChoiceScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todo.data.preferences.PreferencesManager
+import com.example.todo.di.userThemeChoiceScreen.UserThemeChoiceFragmentScope
 import com.example.todo.domain.model.UserThemeChoice
 import com.example.todo.navigation.FragmentNavigation
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@UserThemeChoiceFragmentScope
 class UserThemeChoiceViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val navigation: FragmentNavigation,

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,6 +38,7 @@ fun TodoItemsToolBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onChangeHiddenCompletedItems: (Boolean) -> Unit,
     onClickSettings: () -> Unit,
+    onClickAppInformation: () -> Unit,
 ) {
 
     val shadowPadding by remember {
@@ -96,6 +98,18 @@ fun TodoItemsToolBar(
                     contentDescription = stringResource(id = R.string.icon_settings),
                 )
             }
+
+            IconButton(
+                modifier = Modifier.padding(0.dp),
+                onClick = onClickAppInformation,
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(24.dp),
+                    imageVector = Icons.Filled.Info,
+                    contentDescription = stringResource(id = R.string.icon_information),
+                )
+            }
         }
     )
 }
@@ -112,6 +126,7 @@ fun TodoItemsToolBarPreview() {
             scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
             onChangeHiddenCompletedItems = { },
             onClickSettings = { },
+            onClickAppInformation = { },
         )
     }
 }

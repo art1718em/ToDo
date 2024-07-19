@@ -148,6 +148,10 @@ class TodoItemsViewModel @Inject constructor(
         fragmentNavigation.navigateToUserThemeChoiceFragment()
     }
 
+    fun navigateToAppInformation() {
+        fragmentNavigation.navigateAppInformation()
+    }
+
 }
 
 fun TodoItem.toTodoItemsUiModel(): TodoItemUiModel {

@@ -1,8 +1,10 @@
 package com.example.todo.ui.userThemeChoiceScreen
 
+import com.example.todo.di.userThemeChoiceScreen.UserThemeChoiceFragmentScope
 import com.example.todo.domain.model.UserThemeChoice
 import javax.inject.Inject
 
+@UserThemeChoiceFragmentScope
 class UserThemeChoicePresenter @Inject constructor(
     private val userThemeChoiceViewModel: UserThemeChoiceViewModel,
 ) {
